@@ -8,14 +8,15 @@ import MysteryWord from './reusable-components/mystery-word';
 import './App.scss';
 import HPBar from './reusable-components/hp-bar/hp-bar';
 
-const KEY = 'xxxxxxx'; // DEFUNCT KEY, NICE TRY SCAMMERS. TODO make this an env variable
+const youtubeApiKey = process.env.YOUTUBE_API_KEY;
+
 const youtube = axios.create({
   baseURL: "https://www.googleapis.com/youtube/v3",
   params: {
     part:'snippet',
     type:'video',
     maxResults: 10,
-    key: KEY
+    key: youtubeApiKey
   }
 });
 const mysteryWordsFile = require("./words.txt");

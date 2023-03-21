@@ -1,5 +1,5 @@
 {
-  "name": "video-guessr",
+  "name": "word-guesser",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -43,5 +43,24 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": "index.tsx",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sweenydev/word-guesser.git"
+  },
+  "keywords": [
+    "react",
+    "game",
+    "youtube",
+    "puzzle"
+  ],
+  "author": "Sweeny",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/sweenydev/word-guesser/issues"
+  },
+  "homepage": "https://github.com/sweenydev/word-guesser#readme"
 }
