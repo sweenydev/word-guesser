@@ -8,7 +8,7 @@ import MysteryWord from './reusable-components/mystery-word';
 import './App.scss';
 import HPBar from './reusable-components/hp-bar/hp-bar';
 
-const KEY = 'AIzaSyCYhOPu77ax1f0BzJrRyehh4pn0TMubqj4';
+const KEY = 'xxxxxxx'; // DEFUNCT KEY, NICE TRY SCAMMERS. TODO make this an env variable
 const youtube = axios.create({
   baseURL: "https://www.googleapis.com/youtube/v3",
   params: {
