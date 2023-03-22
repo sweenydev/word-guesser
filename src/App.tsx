@@ -8,17 +8,6 @@ import MysteryWord from './reusable-components/mystery-word';
 import './App.scss';
 import HPBar from './reusable-components/hp-bar/hp-bar';
 
-const youtubeApiKey = process.env.YOUTUBE_API_KEY;
-
-const youtube = axios.create({
-  baseURL: "https://www.googleapis.com/youtube/v3",
-  params: {
-    part:'snippet',
-    type:'video',
-    maxResults: 10,
-    key: youtubeApiKey
-  }
-});
 const mysteryWordsFile = require("./words.txt");
 interface MysteryWordComponentRefType {
   revealLetter: () => void;
@@ -28,6 +17,8 @@ function App() {
   const wordsList = useRef<Array<string>>([]);
   const lastSearch = useRef<Array<any>>([]);
   const lastSearchedIndex = useRef<number>();
+  const youtube = useRef<any>(null);
+
   const [userWord, setUserWord] = useState<string>('');
   const [mysteryWord, setMysteryWord] = useState<string>('');
   const [hintPoints, setHintPoints] = useState<number>(100);
@@ -37,11 +28,45 @@ function App() {
 
   const mysteryWordComponentRef = useRef<MysteryWordComponentRefType>(null);
 
+  async function searchVids() {
+    if (searchIndex !== lastSearchedIndex.current && searchIndex !==0) {
+      // Use previously fetched data on searchIndex increment
+      setVideoId(lastSearch.current[searchIndex].id.videoId); 
+      lastSearchedIndex.current = searchIndex;
+      setHintPoints(hintPoints-2);
+      console.log('old data used!','\nMYSTERY WORD', mysteryWord, '\nUSER WORD', userWord, '\nSEARCHINDEX', searchIndex);
+    } 
+    else if (userWord && mysteryWord) {
+      youtube.current.get('/search', {params: {q: `${userWord} ${mysteryWord}`}})
+      .then((res: { data: { items: any[]; }; }) => {
+        setVideoId(res.data.items[searchIndex].id.videoId);
+        lastSearch.current = res.data.items;
+        lastSearchedIndex.current = searchIndex;
+        console.log('MYSTERY WORD:', mysteryWord, '\nUSER WORD:', userWord, '\nSEARCHINDEX:', searchIndex);
+      })
+      .catch((err: any) => console.log(err));
+    }
+  }
+
   useEffect(() => {
     // This code will only run when component mounts
     fetch(mysteryWordsFile).then(response => response.text()).then((text) => {
       wordsList.current = text.split("\r\n");
     });
+    const fetchData = async () => {
+      const response = await fetch('http://localhost:4000/api/data');
+      const jsonData = await response.json();
+      youtube.current = axios.create({
+        baseURL: "https://www.googleapis.com/youtube/v3",
+        params: {
+          part:'snippet',
+          type:'video',
+          maxResults: 10,
+          key: jsonData.youtubeApiKey
+        }
+      });
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -70,26 +95,6 @@ function App() {
     } else {
       alert('WRONG. Guess again chump');
       setHintPoints(hintPoints-1);
-    }
-  }
-
-  async function searchVids() {
-    if (searchIndex !== lastSearchedIndex.current && searchIndex !==0) {
-      // Use previously fetched data on searchIndex increment
-      setVideoId(lastSearch.current[searchIndex].id.videoId); 
-      lastSearchedIndex.current = searchIndex;
-      setHintPoints(hintPoints-2);
-      console.log('old data used!','\nMYSTERY WORD', mysteryWord, '\nUSER WORD', userWord, '\nSEARCHINDEX', searchIndex);
-    } 
-    else if (userWord && mysteryWord) {
-      youtube.get('/search', {params: {q: `${userWord} ${mysteryWord}`}})
-      .then(res => {
-        setVideoId(res.data.items[searchIndex].id.videoId);
-        lastSearch.current = res.data.items;
-        lastSearchedIndex.current = searchIndex;
-        console.log('MYSTERY WORD:', mysteryWord, '\nUSER WORD:', userWord, '\nSEARCHINDEX:', searchIndex);
-      })
-      .catch(err => console.log(err));
     }
   }
 

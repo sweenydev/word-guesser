@@ -1,10 +1,14 @@
 const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+
 const app = express();
 
-app.get('/', (req, res) => {
-  res.send('Test server');
+app.use(cors());
+app.get('/api/data', (req, res) => {
+  console.log(process.env.YOUTUBE_API_KEY);
+  const data = { youtubeApiKey: process.env.YOUTUBE_API_KEY };
+  res.send(data);
 });
 
-app.listen(5000, () => {
-  console.log('Server listening on port 5000');
-});
+app.listen(4000, () => console.log('Server started on port 4000'));
