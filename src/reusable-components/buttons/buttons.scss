@@ -11,6 +11,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  text-align: center;
   white-space: pre-wrap;
   &.hint {
     background: $primary-color;
@@ -42,7 +43,7 @@
   padding: 0px 5px 6px 8px;
   flex-basis: 50%;
   &::placeholder {
-    color: gray;
+    color: $tertiary-color;
     font-size: 2vh;
   }
   &:focus {
