@@ -1,15 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
-
-// Used for rainbow effects
-$rainbowColors: (
-  rgb(252, 65, 65),
-  orange,
-  yellow,
-  rgb(33, 156, 33),
-  rgb(94, 94, 255),
-  rgb(163, 77, 224),
-  rgb(250, 178, 250)
-);
+@import './variables.scss';
 
 body {
   overflow: hidden;
@@ -38,7 +27,7 @@ body {
     bottom:-50%;
     left:-50%;
     left: -100%;
-    width: 400%;
+    width: 300%;
     height:  150vh;
     animation: bubbles-illusion 35s linear infinite;
     z-index: -1;
@@ -55,11 +44,12 @@ $screen-height: 44vh;
   top: $screen-top;
   height: $screen-height;
   width: $screen-width;
-  max-width: calc(95vw - 16vh) !important;
-  border: 6vh solid rgb(49, 49, 49);
-  border-left: 8vh solid rgb(49, 49, 49);
-  border-right: 8vh solid rgb(49, 49, 49);
+  max-width: calc(95vw - 16vh);
+  border: 6vh solid $secondary-color;
+  border-left: 8vh solid $secondary-color;
+  border-right: 8vh solid $secondary-color;
   border-radius: 50px;
+  //This margin-bottom is applied to hide the title of the video
   margin-bottom: -50px;
   z-index: 2;
   pointer-events: none;
@@ -67,8 +57,8 @@ $screen-height: 44vh;
 
 .tv-screen {
   height: calc($screen-height + 6vh);
-  width: $screen-width !important;
-  max-width: calc(95vw - 16vh) !important;
+  width: $screen-width;
+  max-width: calc(95vw - 16vh);
   position: absolute;
   top: $screen-top;
   border-left: 1px solid black;
@@ -78,20 +68,15 @@ $screen-height: 44vh;
   z-index: 4;
   position:absolute;
   top: calc($screen-top + 2vh);
-  width: $screen-width !important;
-  max-width: calc(95vw - 16vh) !important;
+  width: $screen-width;
+  max-width: calc(95vw - 16vh);
   font-size: calc(2vmin);
-  .grid-item {
-    display: flex;
-    justify-content: flex-start;
-    flex-basis: 75% !important;
-    &+.grid-item{
-      flex-basis: 25% !important;
-    }
-  }
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   .hint-points {
+    flex-basis: 75%;
     display: flex; 
-    justify-content: left;
     align-items: center;
     .hp-bar-container {
       margin-left:10px;
@@ -100,47 +85,51 @@ $screen-height: 44vh;
       font-size: calc(1.5vmin);
     }
   }
+  .score {
+    flex-basis: 25%;
+  }
   
 }
 
 .words-container {
   z-index: 4;
   position: absolute;
+  display: flex;
+  flex-wrap: wrap;
   top: ($screen-height + $screen-top + 7vh);
   height: 5vh;
-  width: ($screen-width) !important;
-  max-width: calc(95vw - 16vh) !important;
+  width: ($screen-width);
+  max-width: calc(95vw - 16vh);
   font-size: calc(2px + 2vmin);
-  .grid-item {
-    display: flex;
+  span {
     justify-content: flex-start;
+    flex-basis: 50%;
   }
   .user-word {
-    color: red;
+    color: $primary-color;
     margin-left: 5px;
   }
 }
 
 
 /** HINTS **/
-.grid-container {
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
-  .grid-item {
-    flex-basis: 50%;
-  }
-}
-
 .hint-container {
   position: absolute;
   bottom: .5vh;
   height: 36vh;
   padding: 20px 20px 0;
   margin: 0 20px;
-  border: 5px solid rgb(90, 90, 90);
+  border: 5px solid $tertiary-color;
   border-radius: 20px;
-  background: rgb(49, 49, 49);
+  background: $secondary-color;
+  .grid-container {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    .grid-item {
+      flex-basis: 50%;
+    }
+  }
 }
 
 //Creates the illusion of independently rising bubbles

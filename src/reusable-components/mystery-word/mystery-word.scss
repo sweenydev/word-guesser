@@ -1,17 +1,9 @@
-$rainbowColors: (
-  rgb(252, 65, 65),
-  orange,
-  yellow,
-  rgb(33, 156, 33),
-  rgb(94, 94, 255),
-  rgb(163, 77, 224),
-  rgb(250, 178, 250)
-);
+@import '/src/variables.scss';
 
 .mystery-word {
   border-radius: 15%;
   margin-left: 5px;
-  color: red;
+  color: $primary-color;
   .hidden-letter {
     display: inline-block;
     font-size: calc(5px + 2vmin);
@@ -20,8 +12,8 @@ $rainbowColors: (
     animation: rainbow-cycle 6s ease-in infinite;
     @for $i from 0 through 20 {
       &:nth-of-type(#{$i}) {
-        animation-delay: (($i - 1) % length($rainbowColors)) * (6s / length($rainbowColors));
-        color: nth($rainbowColors, (($i) % length($rainbowColors)) + 1);
+        animation-delay: (($i - 1) % length($rainbow-colors)) * (6s / length($rainbow-colors));
+        color: nth($rainbow-colors, (($i) % length($rainbow-colors)) + 1);
       }
     }
   }
@@ -47,16 +39,16 @@ $rainbowColors: (
 
 //Rainbow animation for mystery letters 
 @keyframes rainbow-cycle {
-  // Loop through each color and assign a percentage based on its index in the $rainbowColors list
-  @for $i from 1 through length($rainbowColors) {
-    $color: nth($rainbowColors, $i);
-    #{$i * (100 / length($rainbowColors))}% {
+  // Loop through each color and assign a percentage based on its index in the $rainbow-colors list
+  @for $i from 1 through length($rainbow-colors) {
+    $color: nth($rainbow-colors, $i);
+    #{$i * (100 / length($rainbow-colors))}% {
       color: $color;
     }
   }
   0%{
     transform: translateY(0px);
-    color:nth($rainbowColors, 1);
+    color:nth($rainbow-colors, 1);
   }
   12.5% {
     transform: translateY(-1.3px);
@@ -81,6 +73,6 @@ $rainbowColors: (
   }
   100%{
     transform: translateY(0px);
-    color:nth($rainbowColors, 1);
+    color:nth($rainbow-colors, 1);
   }
 }

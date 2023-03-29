@@ -114,20 +114,20 @@ function App() {
             }}
             position="absolute"/>
         </div>
-        <div className="score-board grid-container">
-          <div className="hint-points grid-item">
+        <div className="score-board">
+          <div className="hint-points">
             Hint Points:
             <div className="hp-bar-container">
               <HPBar maxHP={100} currentHP={hintPoints}/>
             </div>
           </div>
-          <span className='grid-item'>Score: {currentScore.toString().padStart(6,'0')}</span>
+          <span className='score'>Score: {currentScore.toString().padStart(6,'0')}</span>
         </div>
-        <div className="words-container grid-container">
-          <span className='grid-item'>Your Word: 
+        <div className="words-container">
+          <span>Your Word: 
             <span className='user-word'>{userWord}</span>
           </span>
-          <span className='grid-item'>Mystery Word:
+          <span>Mystery Word:
             <MysteryWord ref={mysteryWordComponentRef} mysteryWord={mysteryWord}/>
           </span>
         </div>

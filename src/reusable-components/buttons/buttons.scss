@@ -1,3 +1,5 @@
+@import '/src/variables.scss';
+
 .button {
   z-index: 3;
   height: 8vh;
@@ -11,8 +13,8 @@
   align-items: center;
   white-space: pre-wrap;
   &.hint {
-    background: red;
-    border: 4px solid red;
+    background: $primary-color;
+    border: 4px solid $primary-color;
     color: white;
     &:hover {
       background: rgb(255, 100, 100);
@@ -36,7 +38,7 @@
   height: 8vh;
   margin: 10px 10px 0 0;
   border-radius: 0 10px 10px 0;
-  border: 4px solid red;
+  border: 4px solid $primary-color;
   padding: 0px 5px 6px 8px;
   flex-basis: 50%;
   &::placeholder {
