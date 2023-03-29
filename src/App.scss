@@ -6,8 +6,6 @@ body {
 
 .App-header {
   font-family: 'Fredoka One', cursive;
-  font-weight: lighter;
-  background: none;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -22,12 +20,7 @@ body {
     background-size: 200px;
     filter: saturate(65%) brightness(110%) blur(2.7px);
     position: absolute;
-    top:-50%;
-    right:-50%;
-    bottom:-50%;
-    left:-50%;
-    left: -100%;
-    width: 300%;
+    width: 150vw;
     height:  150vh;
     animation: bubbles-illusion 35s linear infinite;
     z-index: -1;
