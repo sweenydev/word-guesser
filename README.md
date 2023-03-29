@@ -2,6 +2,8 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+In order to run locally, you must set your youtube api key in a .env file at the root of the project as YOUTUBE_API_KEY=
+
 ## Available Scripts
 
 In the project directory, you can run:
