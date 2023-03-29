@@ -2,9 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useState } from 'react';
 import ReactPlayer from 'react-player/youtube';
-import StandardButton from './reusable-components/standard-button';
-import InputButton from './reusable-components/input-button';
-import MysteryWord from './reusable-components/mystery-word';
+import StandardButton from './reusable-components/buttons/standard-button';
+import InputButton from './reusable-components/buttons/input-button';
+import MysteryWord from './reusable-components/mystery-word/mystery-word';
 import './App.scss';
 import HPBar from './reusable-components/hp-bar/hp-bar';
 

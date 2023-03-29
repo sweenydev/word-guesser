@@ -1,0 +1,49 @@
+.button {
+  z-index: 3;
+  height: 8vh;
+  border-radius: 10px;
+  padding: 3px 5px;
+  margin: 10px;
+  user-select: none;
+  font-size: 1.7vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: pre-wrap;
+  &.hint {
+    background: red;
+    border: 4px solid red;
+    color: white;
+    &:hover {
+      background: rgb(255, 100, 100);
+    }
+  }
+  &.input {
+    border-radius: 10px 0 0 10px;
+    border-right: 1px;
+    margin-right: 0px;
+    flex-basis: 50%;
+  }
+  &:hover {
+    cursor: pointer;
+  }
+  transition: all .25s ease-in-out; 
+}
+
+.button-input-text {
+  z-index: 2;
+  font-size: 2.3vh;
+  height: 8vh;
+  margin: 10px 10px 0 0;
+  border-radius: 0 10px 10px 0;
+  border: 4px solid red;
+  padding: 0px 5px 6px 8px;
+  flex-basis: 50%;
+  &::placeholder {
+    color: gray;
+    font-size: 2vh;
+  }
+  &:focus {
+    outline: none;
+  }
+}

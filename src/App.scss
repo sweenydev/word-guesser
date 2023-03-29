@@ -1,20 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
 // Used for rainbow effects
 $rainbowColors: (
   rgb(252, 65, 65),
@@ -57,60 +42,6 @@ body {
     height:  150vh;
     animation: bubbles-illusion 35s linear infinite;
     z-index: -1;
-  }
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-.button {
-  z-index: 3;
-  height: 8vh;
-  border-radius: 10px;
-  padding: 3px 5px;
-  margin: 10px;
-  user-select: none;
-  font-size: 1.7vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  white-space: pre-wrap;
-  &.hint {
-    background: red;
-    border: 4px solid red;
-    color: white;
-    &:hover {
-      background: rgb(255, 100, 100);
-    }
-  }
-  &.input {
-    border-radius: 10px 0 0 10px;
-    border-right: 1px;
-    margin-right: 0px;
-    flex-basis: 50%;
-  }
-  &:hover {
-    cursor: pointer;
-  }
-  transition: all .25s ease-in-out; 
-}
-
-.button-input-text {
-  z-index: 2;
-  font-size: 2.3vh;
-  height: 8vh;
-  margin: 10px 10px 0 0;
-  border-radius: 0 10px 10px 0;
-  border: 4px solid red;
-  padding: 0px 5px 6px 8px;
-  flex-basis: 50%;
-  &::placeholder {
-    color: gray;
-    font-size: 2vh;
-  }
-  &:focus {
-    outline: none;
   }
 }
 
@@ -185,34 +116,8 @@ $screen-height: 44vh;
     justify-content: flex-start;
   }
   .user-word {
-    //font-size: calc(8px + 2vmin);
     color: red;
     margin-left: 5px;
-  }
-  .mystery-word {
-    border-radius: 15%;
-    margin-left: 5px;
-    color: red;
-    .hidden-letter {
-      display: inline-block;
-      font-size: calc(5px + 2vmin);
-      font-weight: 600;
-      margin: 0 2px;
-      animation: rainbow-cycle 6s ease-in infinite;
-      @for $i from 0 through 20 {
-        &:nth-of-type(#{$i}) {
-          animation-delay: (($i - 1) % length($rainbowColors)) * (6s / length($rainbowColors));
-          color: nth($rainbowColors, (($i) % length($rainbowColors)) + 1);
-        }
-      }
-    }
-    .revealed-letter {
-      display: inline-block;
-      font-weight: 400;
-      margin: 0 2px;
-      //font-size: calc(8px + 2vmin);
-      animation: fade-in .4s ease-in forwards;
-    }
   }
 }
 
@@ -231,53 +136,11 @@ $screen-height: 44vh;
   position: absolute;
   bottom: .5vh;
   height: 36vh;
-    //height: calc(36vh - 10vw);
-
   padding: 20px 20px 0;
   margin: 0 20px;
   border: 5px solid rgb(90, 90, 90);
   border-radius: 20px;
   background: rgb(49, 49, 49);
-}
-
-//Rainbow animation for mystery letters 
-@keyframes rainbow-cycle {
-  // Loop through each color and assign a percentage based on its index in the $rainbowColors list
-  @for $i from 1 through length($rainbowColors) {
-    $color: nth($rainbowColors, $i);
-    #{$i * (100 / length($rainbowColors))}% {
-      color: $color;
-    }
-  }
-  0%{
-    transform: translateY(0px);
-    color:nth($rainbowColors, 1);
-  }
-  12.5% {
-    transform: translateY(-1.3px);
-  }
-  25%{
-    transform: translateY(0px);
-  }
-  37.5%{
-    transform: translateY(1.3px);
-  }
-  50%{
-    transform: translateY(0px);
-  }
-  62.5%{
-    transform: translateY(-1.3px);
-  }
-  75%{
-    transform: translateY(0px);
-  }
-  87.5%{
-    transform: translateY(1.3px);
-  }
-  100%{
-    transform: translateY(0px);
-    color:nth($rainbowColors, 1);
-  }
 }
 
 //Creates the illusion of independently rising bubbles
@@ -292,16 +155,5 @@ $screen-height: 44vh;
   100%{
     background-position: 0px -400px;
     transform:skewX(-5deg);
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: scale(1.35);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
   }
 }

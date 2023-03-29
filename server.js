@@ -6,7 +6,6 @@ const app = express();
 
 app.use(cors());
 app.get('/api/data', (req, res) => {
-  console.log(process.env.YOUTUBE_API_KEY);
   const data = { youtubeApiKey: process.env.YOUTUBE_API_KEY };
   res.send(data);
 });

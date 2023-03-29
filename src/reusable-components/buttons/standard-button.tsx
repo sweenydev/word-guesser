@@ -1,3 +1,5 @@
+import './buttons.scss';
+
 interface StandardButtonProps {
   buttonText: string;
   clickHandler: any;

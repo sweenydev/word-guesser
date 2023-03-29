@@ -1,5 +1,6 @@
 import { useState } from "react";
 import StandardButton from "./standard-button";
+import './buttons.scss';
 
 interface InputButtonProps {
   buttonText: string;

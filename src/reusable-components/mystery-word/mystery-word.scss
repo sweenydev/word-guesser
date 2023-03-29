@@ -1,0 +1,86 @@
+$rainbowColors: (
+  rgb(252, 65, 65),
+  orange,
+  yellow,
+  rgb(33, 156, 33),
+  rgb(94, 94, 255),
+  rgb(163, 77, 224),
+  rgb(250, 178, 250)
+);
+
+.mystery-word {
+  border-radius: 15%;
+  margin-left: 5px;
+  color: red;
+  .hidden-letter {
+    display: inline-block;
+    font-size: calc(5px + 2vmin);
+    font-weight: 600;
+    margin: 0 2px;
+    animation: rainbow-cycle 6s ease-in infinite;
+    @for $i from 0 through 20 {
+      &:nth-of-type(#{$i}) {
+        animation-delay: (($i - 1) % length($rainbowColors)) * (6s / length($rainbowColors));
+        color: nth($rainbowColors, (($i) % length($rainbowColors)) + 1);
+      }
+    }
+  }
+  .revealed-letter {
+    display: inline-block;
+    font-weight: 400;
+    margin: 0 2px;
+    font-size: calc(2px + 2vmin);
+    animation: fade-in .4s ease-in forwards;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+//Rainbow animation for mystery letters 
+@keyframes rainbow-cycle {
+  // Loop through each color and assign a percentage based on its index in the $rainbowColors list
+  @for $i from 1 through length($rainbowColors) {
+    $color: nth($rainbowColors, $i);
+    #{$i * (100 / length($rainbowColors))}% {
+      color: $color;
+    }
+  }
+  0%{
+    transform: translateY(0px);
+    color:nth($rainbowColors, 1);
+  }
+  12.5% {
+    transform: translateY(-1.3px);
+  }
+  25%{
+    transform: translateY(0px);
+  }
+  37.5%{
+    transform: translateY(1.3px);
+  }
+  50%{
+    transform: translateY(0px);
+  }
+  62.5%{
+    transform: translateY(-1.3px);
+  }
+  75%{
+    transform: translateY(0px);
+  }
+  87.5%{
+    transform: translateY(1.3px);
+  }
+  100%{
+    transform: translateY(0px);
+    color:nth($rainbowColors, 1);
+  }
+}

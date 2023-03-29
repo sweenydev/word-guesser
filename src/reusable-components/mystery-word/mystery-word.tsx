@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import './mystery-word.scss';
 
 interface MysteryWordProps {
   ref: any;
