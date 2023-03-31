@@ -18,7 +18,7 @@
     border: 4px solid $primary-color;
     color: white;
     &:hover {
-      background: rgb(255, 100, 100);
+      filter:saturate(300%)
     }
   }
   &.input {

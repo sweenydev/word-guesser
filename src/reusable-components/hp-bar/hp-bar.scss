@@ -28,7 +28,7 @@
     z-index: -1;
     transition: all 1s ease-out;
     &.full {
-      color: yellow;
+      //filter:saturate(200%);
     }
   }
 }
