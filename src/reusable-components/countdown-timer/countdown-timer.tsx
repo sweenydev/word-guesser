@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-const CountdownTimer = ({ timeLeft }) => {
+interface CountdownTimerProps {
+  timeLeft: number;
+}
+
+const CountdownTimer: React.FC<CountdownTimerProps> = ({ timeLeft }) => {
   const [millisLeft, setMillisLeft] = useState(timeLeft);
   
   useEffect(() => {
