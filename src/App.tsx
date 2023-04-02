@@ -33,7 +33,7 @@ function App() {
       // Use previously fetched data on searchIndex increment
       setVideoId(lastSearch.current[searchIndex].id.videoId); 
       lastSearchedIndex.current = searchIndex;
-      setHintPoints(hintPoints-2);
+      changeHintPoints(-2);
       console.log('old data used!','\nMYSTERY WORD', mysteryWord, '\nUSER WORD', userWord, '\nSEARCHINDEX', searchIndex);
     } 
     else if (userWord && mysteryWord) {
@@ -73,16 +73,20 @@ function App() {
     searchVids();
   }, [userWord, mysteryWord, searchIndex]);
   
+  function changeHintPoints(pointChange: number) {
+    setHintPoints(Math.max(0, Math.min(hintPoints + pointChange, 100)));
+  }
+  
   function generateNewMysteryWord(isFree?:boolean) {
     setMysteryWord(wordsList.current[Math.floor(Math.random() * wordsList.current.length) + 1]);
     setSearchIndex(0);
-    if (!isFree) setHintPoints(hintPoints-15);
+    if (!isFree) changeHintPoints(-15);
   }
 
   function changeUserWord(newWord: string, isFree?: boolean) {
     setUserWord(newWord);
     setSearchIndex(0);
-    if (!isFree) setHintPoints(hintPoints-4);
+    if (!isFree) changeHintPoints(-4);
   }
   
   function checkAnswer(guessWord: string) {
@@ -90,11 +94,11 @@ function App() {
       const newWord = prompt('Correct! Choose Your Next Word (leave blank to use previous word)');
       changeUserWord(newWord ? newWord : userWord, true);
       generateNewMysteryWord(true);
-      setHintPoints(hintPoints + Math.floor((100-hintPoints)/4) + 5);
+      changeHintPoints(Math.floor((100-hintPoints)/4) + 5);
       setCurrentScore(currentScore+1);
     } else {
       alert('WRONG. Guess again chump');
-      setHintPoints(hintPoints-1);
+      changeHintPoints(-1);
     }
   }
 
@@ -158,7 +162,7 @@ function App() {
               <StandardButton 
                 classNames={`hint`} 
                 buttonText={`Reveal Random Letter\n(10 HP)`} 
-                clickHandler={()=>{mysteryWordComponentRef.current?.revealLetter(); setHintPoints(hintPoints-10);}} />
+                clickHandler={()=>{mysteryWordComponentRef.current?.revealLetter(); changeHintPoints(-10);}} />
             </div>
           </div>
           <StandardButton 
