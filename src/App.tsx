@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import './App.scss';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useState } from 'react';
+import Confetti from 'react-confetti';
 import ReactPlayer from 'react-player/youtube';
 import StandardButton from './reusable-components/buttons/standard-button';
 import InputButton from './reusable-components/buttons/input-button';
 import MysteryWord from './reusable-components/mystery-word/mystery-word';
-import './App.scss';
 import HPBar from './reusable-components/hp-bar/hp-bar';
 
 const mysteryWordsFile = require("./words.txt");
@@ -25,6 +25,7 @@ function App() {
   const [currentScore, setCurrentScore] = useState<number>(0);
   const [searchIndex, setSearchIndex] = useState<number>(0);
   const [videoId, setVideoId] = useState<string>('dMH0bHeiRNg');
+  const [confettiFalling, setConfettiFalling] = useState<boolean>(false);
 
   const mysteryWordComponentRef = useRef<MysteryWordComponentRefType>(null);
 
@@ -91,6 +92,7 @@ function App() {
   
   function checkAnswer(guessWord: string) {
     if (mysteryWord.toLowerCase() === guessWord.toLowerCase()) {
+      changeConfettiFalling(true);
       const newWord = prompt('Correct! Choose Your Next Word (leave blank to use previous word)');
       changeUserWord(newWord ? newWord : userWord, true);
       generateNewMysteryWord(true);
@@ -102,9 +104,35 @@ function App() {
     }
   }
 
+  function changeConfettiFalling(newConfettiFalling: boolean) {
+    setConfettiFalling(newConfettiFalling);
+    if(newConfettiFalling) {
+      setTimeout(()=>{setConfettiFalling(false)}, 8000);
+    }
+  }
+
   return (
     <div className="App">
       <header className="App-header">
+      {confettiFalling &&
+        <Confetti
+          className="confetti"
+          numberOfPieces={10000}
+          opacity={0.8}
+          gravity={0.05}
+          initialVelocityY={40}
+          tweenDuration={10000}
+          recycle={false}
+          colors={[ //REFERENCE: $rainbow-colors in variables.scss
+            `rgb(252, 65, 65)`,
+            `orange`,
+            `yellow`,
+            `rgb(33, 156, 33)`,
+            `rgb(94, 94, 255)`,
+            `rgb(163, 77, 224)`,
+            `rgb(250, 178, 250)`
+          ]}/>
+        } 
         <div className="tv-bezel"></div>
         <div className="tv-screen">
           <ReactPlayer
@@ -135,7 +163,6 @@ function App() {
             <MysteryWord ref={mysteryWordComponentRef} mysteryWord={mysteryWord}/>
           </span>
         </div>
-        
         <div className="hint-container">
           <div className="grid-container">
             <div className="grid-item">
