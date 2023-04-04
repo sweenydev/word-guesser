@@ -49,4 +49,40 @@
   &:focus {
     outline: none;
   }
+  &.incorrect {
+    animation: incorrect 0.5s ease-in-out;
+  }
+}
+
+@keyframes incorrect {
+  0% {
+    background: white;
+    transform: translateX(0);
+  }
+  12.5% {
+    transform: translateX(-5px);
+  }
+  25% {
+    transform: translateX(5px);
+  }
+  37.5% {
+    transform: translateX(-5px);
+  }
+  50% {
+    background: rgb(248, 139, 139);
+    transform: translateX(5px);
+  }
+  62.5% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+  87.5% {
+    transform: translateX(-5px);
+  }
+  100% {
+    background: white;
+    transform: translateX(0);
+  }
 }

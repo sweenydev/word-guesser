@@ -99,8 +99,8 @@ function App() {
       changeHintPoints(Math.floor((100-hintPoints)/4) + 5);
       setCurrentScore(currentScore+1);
     } else {
-      alert('WRONG. Guess again chump');
       changeHintPoints(-1);
+      return "incorrect";
     }
   }
 

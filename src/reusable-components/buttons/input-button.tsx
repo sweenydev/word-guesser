@@ -11,16 +11,25 @@ interface InputButtonProps {
 
 const InputButton: React.FC<InputButtonProps> = ({ buttonText, clickHandler, classNames, placeholder }) => {
   const [input, setInput] = useState('');
+  const [runIncorrectAnimation, setRunIncorrectAnimation] = useState<boolean>(false);
   
   const onInputChange = (e: any) => {
     setInput(e.target.value);
   }
 
+  const onClick = () => {
+    const result = clickHandler(input);
+    if(result === "incorrect") {
+      setRunIncorrectAnimation(true);
+      setTimeout(()=>{setRunIncorrectAnimation(false)},500);
+    }
+  }
+
   return (
     <div style={{display:`inline-flex`, width:`100%`}}>
-      <StandardButton classNames={`input ${classNames}`} buttonText={buttonText} clickHandler={()=>{clickHandler(input)}} />
+      <StandardButton classNames={`input ${classNames}`} buttonText={buttonText} clickHandler={onClick} />
       <input
-        className={`button-input-text ${classNames}`}
+        className={`button-input-text ${classNames} ${runIncorrectAnimation ? 'incorrect' : ''}`}
         type="text"
         placeholder={placeholder}
         onChange={(event) => {onInputChange(event)}}
