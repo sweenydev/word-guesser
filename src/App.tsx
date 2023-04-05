@@ -23,7 +23,7 @@ function App() {
   const [hintPoints, setHintPoints] = useState<number>(100);
   const [currentScore, setCurrentScore] = useState<number>(0);
   const [searchIndex, setSearchIndex] = useState<number>(0);
-  const [videoId, setVideoId] = useState<string>('dMH0bHeiRNg');
+  const [videoId, setVideoId] = useState<string>('dQw4w9WgXcQ');
   const [confettiFalling, setConfettiFalling] = useState<boolean>(false);
 
   const hintPointCosts = {
@@ -65,7 +65,7 @@ function App() {
       // Use previously fetched data on searchIndex increment
       setVideoId(lastSearch.current[searchIndex].id.videoId); 
       lastSearchedIndex.current = searchIndex;
-      changeHintPoints(-2);
+      changeHintPoints(hintPointCosts.nextVideo);
       console.log('old data used!','\nMYSTERY WORD', mysteryWord, '\nUSER WORD', userWord, '\nSEARCHINDEX', searchIndex);
     } 
     else if (userWord && mysteryWord) {
@@ -103,6 +103,11 @@ function App() {
     if (!isFree) changeHintPoints(hintPointCosts.changeWord);
   }
   
+  function revealLetter(): void {
+    mysteryWordComponentRef.current?.revealLetter(); 
+    changeHintPoints(hintPointCosts.revealLetter());
+  }
+
   function checkAnswer(guessWord: string): void | string {
     if (mysteryWord.toLowerCase() === guessWord.toLowerCase()) {
       changeConfettiFalling(true);
@@ -209,7 +214,7 @@ function App() {
                 <StandardButton 
                   classNames={`hint`} 
                   buttonText={`Reveal Random Letter\n(${-1*hintPointCosts.revealLetter()} HP)`} 
-                  clickHandler={()=>{mysteryWordComponentRef.current?.revealLetter(); changeHintPoints(hintPointCosts.revealLetter());}} />
+                  clickHandler={revealLetter} />
               </div>
                 <StandardButton 
                   classNames={`hint`} 
