@@ -5,6 +5,11 @@ interface HPBarProps {
   currentHP: number;
 }
 
+/**
+ * A component that displays a responsive health bar with animation
+ * @param {number} maxHP - The maximum hp to be a full hp bar.
+ * @param {number} currentHP - The current hp.
+ */
 const HPBar: React.FC<HPBarProps> = ({ maxHP, currentHP }) => {
   return (
     <div className="hp-container">
