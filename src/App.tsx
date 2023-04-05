@@ -35,26 +35,6 @@ function App() {
     newMysteryWord: -15,
   };
 
-  async function searchVids(): Promise<void> {
-    if (searchIndex !== lastSearchedIndex.current && searchIndex !==0) {
-      // Use previously fetched data on searchIndex increment
-      setVideoId(lastSearch.current[searchIndex].id.videoId); 
-      lastSearchedIndex.current = searchIndex;
-      changeHintPoints(-2);
-      console.log('old data used!','\nMYSTERY WORD', mysteryWord, '\nUSER WORD', userWord, '\nSEARCHINDEX', searchIndex);
-    } 
-    else if (userWord && mysteryWord) {
-      youtube.current.get('/search', {params: {q: `${userWord} ${mysteryWord}`}})
-      .then((res: { data: { items: any[]; }; }) => {
-        setVideoId(res.data.items[searchIndex].id.videoId);
-        lastSearch.current = res.data.items;
-        lastSearchedIndex.current = searchIndex;
-        console.log('MYSTERY WORD:', mysteryWord, '\nUSER WORD:', userWord, '\nSEARCHINDEX:', searchIndex);
-      })
-      .catch((err: any) => console.log(err));
-    }
-  }
-
   useEffect(() => {
     // This code will only run when component mounts
     fetch(mysteryWordsFile).then(response => response.text()).then((text) => {
@@ -80,6 +60,26 @@ function App() {
     searchVids();
   }, [userWord, mysteryWord, searchIndex]);
   
+  async function searchVids(): Promise<void> {
+    if (searchIndex !== lastSearchedIndex.current && searchIndex !==0) {
+      // Use previously fetched data on searchIndex increment
+      setVideoId(lastSearch.current[searchIndex].id.videoId); 
+      lastSearchedIndex.current = searchIndex;
+      changeHintPoints(-2);
+      console.log('old data used!','\nMYSTERY WORD', mysteryWord, '\nUSER WORD', userWord, '\nSEARCHINDEX', searchIndex);
+    } 
+    else if (userWord && mysteryWord) {
+      youtube.current.get('/search', {params: {q: `${userWord} ${mysteryWord}`}})
+      .then((res: { data: { items: any[]; }; }) => {
+        setVideoId(res.data.items[searchIndex].id.videoId);
+        lastSearch.current = res.data.items;
+        lastSearchedIndex.current = searchIndex;
+        console.log('MYSTERY WORD:', mysteryWord, '\nUSER WORD:', userWord, '\nSEARCHINDEX:', searchIndex);
+      })
+      .catch((err: any) => console.log(err));
+    }
+  }
+
   function startGame(gameMode: string, initUserWord: string): void | string {
     if (!initUserWord) return 'incorrect';
     generateNewMysteryWord(true);
