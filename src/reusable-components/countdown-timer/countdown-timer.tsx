@@ -4,6 +4,10 @@ interface CountdownTimerProps {
   timeLeft: number;
 }
 
+/**
+ * A component that displays a countdown timer in minutes and seconds, with milliseconds as decimals.
+ * @param {number} timeLeft - The number of milliseconds left on the timer.
+ */
 const CountdownTimer: React.FC<CountdownTimerProps> = ({ timeLeft }) => {
   const [millisLeft, setMillisLeft] = useState(timeLeft);
   

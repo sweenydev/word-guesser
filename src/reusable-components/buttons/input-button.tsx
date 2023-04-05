@@ -9,6 +9,13 @@ interface InputButtonProps {
   placeholder?: string;
 }
 
+/**
+ * An input button component with optional classes and placeholder.
+ * @param {string} buttonText - The text to be displayed on the button.
+ * @param {(inputValue: string) => any} clickHandler - The function to be called when the button is clicked. It receives the current input value as string parameter and returns any value.
+ * @param {string} [classNames] - (Optional) classes to be added to the component button and input.
+ * @param {string} [placeholder] - (Optional) placeholder to be displayed inside the input field.
+ */
 const InputButton: React.FC<InputButtonProps> = ({ buttonText, clickHandler, classNames, placeholder }) => {
   const [input, setInput] = useState('');
   const [runIncorrectAnimation, setRunIncorrectAnimation] = useState<boolean>(false);

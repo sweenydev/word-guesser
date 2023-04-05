@@ -7,6 +7,12 @@ interface MysteryWordProps {
   classNames?: string;
 }
 
+/**
+ * A component that displays an animated "mystery word" which can gradually reveal itself letter by letter. 
+ * @param ref - component reference, can be used to call revealLetter();
+ * @param {string} mysteryWord - The word to be revealed.
+ * @param {string} classNames - (Optional) Additional class names to apply to the component.
+ */
 const MysteryWord: React.FC<MysteryWordProps> = forwardRef(({ mysteryWord, classNames }, ref) => {
   
   const [revealedLetterIndices, setRevealedLetterIndices] = useState<Array<number>>([]);
