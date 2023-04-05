@@ -3,7 +3,7 @@
 In order to run locally, you must set your youtube api key in a .env file at the root of the project as YOUTUBE_API_KEY=
 
 Run `.\start.bat` in the root of the project directory to run the app 
-If that doesnt work run "node server.js" and "npm run start"
+If that doesnt work run `node server.js` and `npm run start`
 
 ## Available Scripts
 
