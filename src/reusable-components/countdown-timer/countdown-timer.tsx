@@ -15,12 +15,11 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ timeLeft }) => {
     }
   }, [millisLeft]);
   
-  const formatTime = () => {
+  function formatTime(): string {
     const totalSecondsLeft = Math.floor(millisLeft / 1000);
     const minutes = Math.floor(totalSecondsLeft / 60);
     const seconds = totalSecondsLeft % 60;
     const millis = millisLeft % 1000;
-    
     return `${minutes}:${String(seconds).padStart(2, '0')}.${String(millis).padStart(3, '0')}`;
   };
   

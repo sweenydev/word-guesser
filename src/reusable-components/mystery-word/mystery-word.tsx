@@ -11,7 +11,7 @@ const MysteryWord: React.FC<MysteryWordProps> = forwardRef(({ mysteryWord, class
   
   const [revealedLetterIndices, setRevealedLetterIndices] = useState<Array<number>>([]);
   
-  const revealLetter = () => {
+  function revealLetter(): void {
     const remainingMysteryLetters = Array.from(Array(mysteryWord.length).keys()).filter((letterIndex)=>!revealedLetterIndices.includes(letterIndex));
     setRevealedLetterIndices([...revealedLetterIndices, (remainingMysteryLetters[Math.floor(Math.random() * remainingMysteryLetters.length)])]);
   }

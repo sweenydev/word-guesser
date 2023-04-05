@@ -117,18 +117,35 @@ $screen-height: 44vh;
   position: absolute;
   bottom: .5vh;
   height: 36vh;
-  padding: 20px 20px 0;
+  padding: 15px 20px;
   margin: 0 20px;
   border: 4px solid $tertiary-color;
   border-radius: 20px;
   background: $secondary-color;
+  min-width: 75%;
+  max-width: 100%;
   .grid-container {
     display: flex;
     flex-wrap: wrap;
-    width: 100%;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
     .grid-item {
       flex-basis: 50%;
+      .button {
+        width: auto;
+      }
     }
+    .button {
+      width: 100%;
+    }
+  }
+  .start-menu {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
   }
 }
 

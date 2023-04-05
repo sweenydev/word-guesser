@@ -13,13 +13,13 @@ const InputButton: React.FC<InputButtonProps> = ({ buttonText, clickHandler, cla
   const [input, setInput] = useState('');
   const [runIncorrectAnimation, setRunIncorrectAnimation] = useState<boolean>(false);
   
-  const onInputChange = (e: any) => {
+  function onInputChange(e: any): void {
     setInput(e.target.value);
   }
 
-  const onClick = () => {
+  function onClick(): void {
     const result = clickHandler(input);
-    if(result === "incorrect") {
+    if(result === 'incorrect') {
       setRunIncorrectAnimation(true);
       setTimeout(()=>{setRunIncorrectAnimation(false)},500);
     }
