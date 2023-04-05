@@ -35,8 +35,8 @@ function App() {
     newMysteryWord: -15,
   };
 
+  /** Prepare words list and setup youtube api. This code will only run when component mounts */
   useEffect(() => {
-    // This code will only run when component mounts
     fetch(mysteryWordsFile).then(response => response.text()).then((text) => {
       wordsList.current = text.split('\r\n');
     });
@@ -56,10 +56,15 @@ function App() {
     fetchData();
   }, []);
 
+  /** Run searchVids everytime there is a change to userWord, mysteryWord, or searchIndex, to generate and select new videos */
   useEffect(() => {
     searchVids();
   }, [userWord, mysteryWord, searchIndex]);
   
+  /**
+   * Searches Youtube for a video based on userWord and mysteryWord or uses previously fetched data.
+   * @returns A Promise that resolves with void when the function completes.
+   */
   async function searchVids(): Promise<void> {
     if (searchIndex !== lastSearchedIndex.current && searchIndex !==0) {
       // Use previously fetched data on searchIndex increment
@@ -80,6 +85,12 @@ function App() {
     }
   }
 
+  /**
+   * Starts a new game with given game mode and user word.
+   * @param gameMode The chosen game mode. (TODO, add game modes)
+   * @param initUserWord The initial user word to use in the game.
+   * @returns void if the initUserWord parameter is empty, otherwise returns "incorrect".
+   */
   function startGame(gameMode: string, initUserWord: string): void | string {
     if (!initUserWord) return 'incorrect';
     generateNewMysteryWord(true);
@@ -87,27 +98,52 @@ function App() {
     setShowStartOptions(false);
   }
 
+  /**
+   * Changes hint points by adding the pointChange value.
+   * @param pointChange The amount of points to add/remove from hintPoints.
+   * @returns void.
+   */
   function changeHintPoints(pointChange: number): void {
     setHintPoints(Math.max(0, Math.min(hintPoints + pointChange, 100)));
   }
   
+  /**
+   * Generates a new mystery word, sets the search index to 0, and charges hint points.
+   * @param isFree if true, generates the new mystery word without a cost to hint points.
+   * @returns void.
+   */
   function generateNewMysteryWord(isFree?:boolean): void {
     setMysteryWord(wordsList.current[Math.floor(Math.random() * wordsList.current.length) + 1]);
     setSearchIndex(0);
     if (!isFree) changeHintPoints(hintPointCosts.newMysteryWord);
   }
 
+  /**
+   * Changes the user's word, sets the search index to 0, and charges hint points.
+   * @param newWord The new user word.
+   * @param isFree if true, changes the user's word without a cost to hint points.
+   * @returns void.
+   */
   function changeUserWord(newWord: string, isFree?: boolean): void {
     setUserWord(newWord);
     setSearchIndex(0);
     if (!isFree) changeHintPoints(hintPointCosts.changeWord);
   }
   
+  /**
+   * Reveals a letter in the mystery word and charges hint points 
+   * @returns void.
+   */
   function revealLetter(): void {
     mysteryWordComponentRef.current?.revealLetter(); 
     changeHintPoints(hintPointCosts.revealLetter());
   }
 
+  /**
+   * Checks if guessWord matches the mystery word. If guessWord matches, starts a new round and rewards hint points, if incorrect it charges hintpoints.
+   * @param guessWord The word the user guessed.
+   * @returns void if the guess is correct, otherwise returns "incorrect" for inputbutton animation.
+   */
   function checkAnswer(guessWord: string): void | string {
     if (mysteryWord.toLowerCase() === guessWord.toLowerCase()) {
       changeConfettiFalling(true);
@@ -123,6 +159,11 @@ function App() {
     }
   }
 
+  /**
+   * Enables or disables the falling confetti element, and once enabled sets a timer to disable it after the animation.
+   * @param newConfettiFalling A boolean that controls whether to start or stop the confetti.
+   * @returns void.
+   */
   function changeConfettiFalling(newConfettiFalling: boolean): void {
     setConfettiFalling(newConfettiFalling);
     if(newConfettiFalling) {
