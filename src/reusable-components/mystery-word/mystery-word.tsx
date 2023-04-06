@@ -22,6 +22,7 @@ const MysteryWord: React.FC<MysteryWordProps> = forwardRef(({ mysteryWord, class
     setRevealedLetterIndices([...revealedLetterIndices, (remainingMysteryLetters[Math.floor(Math.random() * remainingMysteryLetters.length)])]);
   }
 
+  // If the mystery word changes, reset revealed letter indices
   useEffect(() => {
     setRevealedLetterIndices([]);
   },[mysteryWord])
@@ -30,7 +31,7 @@ const MysteryWord: React.FC<MysteryWordProps> = forwardRef(({ mysteryWord, class
     revealLetter,
   }));
   
-  //Random key is used to ensure the css rainbow cycle restarts with render changes
+  // Random key is used to ensure the css rainbow cycle restarts with render changes
   const randomKeyPiece = Math.random();
 
   return (
