@@ -8,6 +8,7 @@ import InputButton from './reusable-components/buttons/input-button';
 import MysteryWord from './reusable-components/mystery-word/mystery-word';
 import HPBar from './reusable-components/hp-bar/hp-bar';
 
+type GameState = 'menu' | 'playing' | 'gameover' | 'roundover';
 const mysteryWordsFile = require('./words.txt');
 
 function App() {
@@ -17,7 +18,6 @@ function App() {
   const youtube = useRef<any>(null);
   const mysteryWordComponentRef = useRef<any>(null);
 
-  const [showStartOptions, setShowStartOptions] = useState<boolean>(true);
   const [userWord, setUserWord] = useState<string>('');
   const [mysteryWord, setMysteryWord] = useState<string>('');
   const [hintPoints, setHintPoints] = useState<number>(100);
@@ -25,6 +25,7 @@ function App() {
   const [searchIndex, setSearchIndex] = useState<number>(0);
   const [videoId, setVideoId] = useState<string>('dQw4w9WgXcQ');
   const [confettiFalling, setConfettiFalling] = useState<boolean>(false);
+  const [gameState, setGameState] = useState<GameState>('menu');
 
   const hintPointCosts = {
     incorrectGuess: -2,
@@ -95,7 +96,9 @@ function App() {
     if (!initUserWord) return 'incorrect';
     generateNewMysteryWord(true);
     changeUserWord(initUserWord, true);
-    setShowStartOptions(false);
+    setHintPoints(100);
+    setCurrentScore(0);
+    setGameState('playing');
   }
 
   /**
@@ -104,7 +107,11 @@ function App() {
    * @returns void.
    */
   function changeHintPoints(pointChange: number): void {
-    setHintPoints(Math.max(0, Math.min(hintPoints + pointChange, 100)));
+    const newHintPoints = Math.max(0, Math.min(hintPoints + pointChange, 100));
+    setHintPoints(newHintPoints);
+    if (newHintPoints === 0) {
+      setGameState('gameover');
+    }
   }
   
   /**
@@ -193,7 +200,20 @@ function App() {
               `rgb(250, 178, 250)`
             ]}/>
         } 
-        <div className="tv-bezel"></div>
+        <div className="tv-bezel">
+          {gameState==='gameover' && 
+          <div className="game-over-screen">
+            <div>GAME OVER</div>
+            <div>Final score: {currentScore.toString().padStart(6,'0')}</div>
+          </div>
+          }
+          {gameState==='menu' && 
+          <div className="menu-screen">
+            <div>VIDEO GUESSER</div>
+            <div>[placeholder title screen art]</div>
+          </div>
+          }
+        </div>
         <div className="tv-screen">
           <ReactPlayer
             url={`https://www.youtube.com/watch?v=${videoId}`}
@@ -206,7 +226,7 @@ function App() {
             }}
             position="absolute"/>
         </div>
-        {!showStartOptions &&
+        {gameState==='playing' &&
         <>
           <div className="score-board">
             <div className="hint-points">
@@ -228,7 +248,7 @@ function App() {
         </>
         }
         <div className="hint-container">
-          {!showStartOptions &&
+          {gameState==='playing' &&
           <>
             <div className="grid-container">
               <div className="grid-item">
@@ -248,7 +268,7 @@ function App() {
               <div className="grid-item">
                 <StandardButton 
                   classNames={`hint`} 
-                  buttonText={`Play Next Video\n(${-1*hintPointCosts.nextVideo}  HP)\n(Videos Played: ${searchIndex + 1})`} 
+                  buttonText={`Play Next Video\n(${-1*hintPointCosts.nextVideo} HP)\n(Videos Played: ${searchIndex + 1})`} 
                   clickHandler={()=>{setSearchIndex(searchIndex + 1)}} />
               </div>
               <div className="grid-item">
@@ -265,7 +285,7 @@ function App() {
             
           </>
           }
-          {showStartOptions &&
+          {(gameState==='menu' || gameState==='gameover') &&
           <div className="start-menu">
             <InputButton
               classNames={`hint`}
@@ -277,6 +297,15 @@ function App() {
               buttonText={`Speed Mode`}
               clickHandler={(initUserWord)=>{return startGame('speed', initUserWord)}}
               placeholder={`Enter Your Starting Word Here`}/>
+          </div>
+          }
+          {gameState==='roundover' && //TODO implement post round screen
+          <div className="start-menu"> 
+            <InputButton
+              classNames={`hint`}
+              buttonText={`Next Word`}
+              clickHandler={changeUserWord} 
+              placeholder={`Enter Your Next Word Here`}/>
           </div>
           }
         </div>      
