@@ -246,14 +246,12 @@ function App() {
           <div className="video-selectors">
             <StandardButton 
               classNames={`round ${searchIndex === 0 && 'hidden'}`} 
-              buttonText={`<`} 
+              buttonText={`◄`} 
               clickHandler={()=>{setSearchIndex(searchIndex - 1)}} />
-            {searchIndex < videosPurchased && 
             <StandardButton 
               classNames={`round ${searchIndex === videosPurchased && 'hidden'}`} 
-              buttonText={`>`} 
+              buttonText={`►`} 
               clickHandler={()=>{setSearchIndex(searchIndex + 1)}} />
-            }
           </div>
           <div className="score-board">
             <div className="hint-points">

@@ -87,7 +87,7 @@ $screen-height: 44vh;
   justify-content: space-between;
   z-index: 4;
   position:absolute;
-  top: calc($screen-top + ($screen-height / 2));
+  top: calc($screen-top + ($screen-height / 2) + 2vh);
   width: calc($screen-width + 14vh);
   .button {
     margin: 0;
