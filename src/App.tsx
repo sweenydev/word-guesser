@@ -14,7 +14,7 @@ const mysteryWordsFile = require('./words.txt');
 function App() {
   const wordsList = useRef<Array<string>>([]);
   const lastSearch = useRef<Array<any>>([]);
-  const lastSearchedIndex = useRef<number>();
+  const lastSearchedIndex = useRef<number>(0);
   const youtube = useRef<any>(null);
   const mysteryWordComponentRef = useRef<any>(null);
 
@@ -23,6 +23,7 @@ function App() {
   const [hintPoints, setHintPoints] = useState<number>(100);
   const [currentScore, setCurrentScore] = useState<number>(0);
   const [searchIndex, setSearchIndex] = useState<number>(0);
+  const [videosPurchased, setVideosPurchased] = useState<number>(0);
   const [videoId, setVideoId] = useState<string>('dQw4w9WgXcQ');
   const [confettiFalling, setConfettiFalling] = useState<boolean>(false);
   const [gameState, setGameState] = useState<GameState>('menu');
@@ -31,7 +32,7 @@ function App() {
     incorrectGuess: -2,
     correctGuess: () => Math.floor((100-hintPoints)/4) + 5,
     changeWord: -5,
-    nextVideo: -2,
+    nextVideo: -3,
     revealLetter: () => -1 * Math.floor(75 / mysteryWord.length),
     newMysteryWord: -15,
   };
@@ -49,7 +50,7 @@ function App() {
         params: {
           part:'snippet',
           type:'video',
-          maxResults: 10,
+          maxResults: 11,
           key: jsonData.youtubeApiKey
         }
       });
@@ -67,16 +68,16 @@ function App() {
    * @returns A Promise that resolves with void when the function completes.
    */
   async function searchVids(): Promise<void> {
-    if (searchIndex !== lastSearchedIndex.current && searchIndex !==0) {
+    if (searchIndex !== lastSearchedIndex.current /*&& searchIndex !== 0*/) {
       // Use previously fetched data on searchIndex increment
       setVideoId(lastSearch.current[searchIndex].id.videoId); 
       lastSearchedIndex.current = searchIndex;
-      changeHintPoints(hintPointCosts.nextVideo);
       console.log('old data used!','\nMYSTERY WORD', mysteryWord, '\nUSER WORD', userWord, '\nSEARCHINDEX', searchIndex);
     } 
     else if (userWord && mysteryWord) {
       youtube.current.get('/search', {params: {q: `${userWord} ${mysteryWord}`}})
       .then((res: { data: { items: any[]; }; }) => {
+        setVideosPurchased(0);
         setVideoId(res.data.items[searchIndex].id.videoId);
         lastSearch.current = res.data.items;
         lastSearchedIndex.current = searchIndex;
@@ -132,6 +133,7 @@ function App() {
    * @returns void.
    */
   function changeUserWord(newWord: string, isFree?: boolean): void {
+    lastSearchedIndex.current = 0;
     setUserWord(newWord);
     setSearchIndex(0);
     if (!isFree) changeHintPoints(hintPointCosts.changeWord);
@@ -146,6 +148,18 @@ function App() {
     changeHintPoints(hintPointCosts.revealLetter());
   }
 
+  function buyNextVideo(): void | string {
+    if (videosPurchased < 10) {
+      changeHintPoints(hintPointCosts.nextVideo);
+      const newVideosPurchased = videosPurchased + 1
+      setSearchIndex(newVideosPurchased);
+      setVideosPurchased(newVideosPurchased); 
+    } else {
+      return 'incorrect';
+    }
+    
+  }
+
   /**
    * Checks if guessWord matches the mystery word. If guessWord matches, starts a new round and rewards hint points, if incorrect it charges hintpoints.
    * @param guessWord The word the user guessed.
@@ -156,6 +170,7 @@ function App() {
       changeConfettiFalling(true);
       //TODO: Add pre round new word selection menu
       const newWord = null;//prompt('Correct! Choose Your Next Word (leave blank to use previous word)');
+      lastSearchedIndex.current = 0;
       changeUserWord(newWord ? newWord : userWord, true);
       generateNewMysteryWord(true);
       changeHintPoints(hintPointCosts.correctGuess());
@@ -228,6 +243,18 @@ function App() {
         </div>
         {gameState==='playing' &&
         <>
+          <div className="video-selectors">
+            <StandardButton 
+              classNames={`round ${searchIndex === 0 && 'hidden'}`} 
+              buttonText={`<`} 
+              clickHandler={()=>{setSearchIndex(searchIndex - 1)}} />
+            {searchIndex < videosPurchased && 
+            <StandardButton 
+              classNames={`round ${searchIndex === videosPurchased && 'hidden'}`} 
+              buttonText={`>`} 
+              clickHandler={()=>{setSearchIndex(searchIndex + 1)}} />
+            }
+          </div>
           <div className="score-board">
             <div className="hint-points">
               Hint Points:
@@ -268,8 +295,8 @@ function App() {
               <div className="grid-item">
                 <StandardButton 
                   classNames={`hint`} 
-                  buttonText={`Play Next Video\n(${-1*hintPointCosts.nextVideo} HP)\n(Videos Played: ${searchIndex + 1})`} 
-                  clickHandler={()=>{setSearchIndex(searchIndex + 1)}} />
+                  buttonText={`Buy Next Video\n(${-1*hintPointCosts.nextVideo} HP)\n(Videos Purchased: ${videosPurchased} / 10)`} 
+                  clickHandler={buyNextVideo} />
               </div>
               <div className="grid-item">
                 <StandardButton 
