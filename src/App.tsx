@@ -27,6 +27,8 @@ function App() {
   const [videoId, setVideoId] = useState<string>('dQw4w9WgXcQ');
   const [confettiFalling, setConfettiFalling] = useState<boolean>(false);
   const [gameState, setGameState] = useState<GameState>('menu');
+  const [roundNumber, setRoundNumber] = useState<number>(0);
+  const [videoHistory, setVideoHistory] = useState<Array<Array<any>>>([]);
 
   const hintPointCosts = {
     incorrectGuess: -2,
@@ -68,7 +70,7 @@ function App() {
    * @returns A Promise that resolves with void when the function completes.
    */
   async function searchVids(): Promise<void> {
-    if (searchIndex !== lastSearchedIndex.current /*&& searchIndex !== 0*/) {
+    if (searchIndex !== lastSearchedIndex.current) {
       // Use previously fetched data on searchIndex increment
       setVideoId(lastSearch.current[searchIndex].id.videoId); 
       lastSearchedIndex.current = searchIndex;
@@ -79,12 +81,43 @@ function App() {
       .then((res: { data: { items: any[]; }; }) => {
         setVideosPurchased(0);
         setVideoId(res.data.items[searchIndex].id.videoId);
+        addToVideoHistory(res.data.items[searchIndex]);
         lastSearch.current = res.data.items;
         lastSearchedIndex.current = searchIndex;
         console.log('MYSTERY WORD:', mysteryWord, '\nUSER WORD:', userWord, '\nSEARCHINDEX:', searchIndex);
       })
       .catch((err: any) => console.log(err));
     }
+  }
+
+  /**
+   * Adds a new search result object to the video history array for the current round.
+   * @param {any} searchResult - Object returned from youtube search api containing information about the searched video.
+   * @returns {void}
+   */
+  function addToVideoHistory(searchResult: any): void {
+    const publishedDate = new Date(searchResult.snippet.publishedAt);
+    const newSearchResult = {
+      title: searchResult.snippet.title,
+      videoURL: `https://www.youtube.com/watch?v=${searchResult.id.videoId}`,
+      channelName: searchResult.snippet.channelTitle,
+      channelURL: `https://www.youtube.com/channel/${searchResult.snippet.channelId}`,
+      description: searchResult.snippet.description,
+      releaseDate: publishedDate.toLocaleDateString(
+        'en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric'
+        }
+      ),
+      thumbnailURL: searchResult.snippet.thumbnails.medium.url,
+    };
+    const newVideoHistory = [...videoHistory];
+    newVideoHistory[roundNumber] 
+      ? newVideoHistory[roundNumber].push(newSearchResult)
+      : newVideoHistory[roundNumber] = [newSearchResult];
+    setVideoHistory(newVideoHistory);
+    console.log('Current video history',newVideoHistory);
   }
 
   /**
@@ -150,10 +183,11 @@ function App() {
 
   function buyNextVideo(): void | string {
     if (videosPurchased < 10) {
-      changeHintPoints(hintPointCosts.nextVideo);
       const newVideosPurchased = videosPurchased + 1
+      setVideosPurchased(newVideosPurchased);
       setSearchIndex(newVideosPurchased);
-      setVideosPurchased(newVideosPurchased); 
+      addToVideoHistory(lastSearch.current[newVideosPurchased]);
+      changeHintPoints(hintPointCosts.nextVideo);
     } else {
       return 'incorrect';
     }
@@ -175,6 +209,7 @@ function App() {
       generateNewMysteryWord(true);
       changeHintPoints(hintPointCosts.correctGuess());
       setCurrentScore(currentScore+1);
+      setRoundNumber(roundNumber+1);
     } else {
       changeHintPoints(hintPointCosts.incorrectGuess);
       return 'incorrect';
