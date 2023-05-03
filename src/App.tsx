@@ -9,6 +9,15 @@ import MysteryWord from './reusable-components/mystery-word/mystery-word';
 import HPBar from './reusable-components/hp-bar/hp-bar';
 
 type GameState = 'menu' | 'playing' | 'gameover' | 'roundover';
+type VideoInfo = {
+  title: string;
+  videoURL: string;
+  channelName: string;
+  channelURL: string;
+  description: string;
+  releaseDate: string;
+  thumbnailURL: string;
+};
 const mysteryWordsFile = require('./words.txt');
 
 function App() {
@@ -28,7 +37,7 @@ function App() {
   const [confettiFalling, setConfettiFalling] = useState<boolean>(false);
   const [gameState, setGameState] = useState<GameState>('menu');
   const [roundNumber, setRoundNumber] = useState<number>(0);
-  const [videoHistory, setVideoHistory] = useState<Array<Array<any>>>([]);
+  const [videoHistory, setVideoHistory] = useState<Array<Array<VideoInfo>>>([]);
 
   const hintPointCosts = {
     incorrectGuess: -2,
@@ -91,18 +100,18 @@ function App() {
   }
 
   /**
-   * Adds a new search result object to the video history array for the current round.
-   * @param {any} searchResult - Object returned from youtube search api containing information about the searched video.
+   * Adds a new VideoInfo object to the video history array for the current round.
+   * @param {any} apiSearchResult - Object returned from youtube search api containing information about the searched video.
    * @returns {void}
    */
-  function addToVideoHistory(searchResult: any): void {
-    const publishedDate = new Date(searchResult.snippet.publishedAt);
-    const newSearchResult = {
-      title: searchResult.snippet.title,
-      videoURL: `https://www.youtube.com/watch?v=${searchResult.id.videoId}`,
-      channelName: searchResult.snippet.channelTitle,
-      channelURL: `https://www.youtube.com/channel/${searchResult.snippet.channelId}`,
-      description: searchResult.snippet.description,
+  function addToVideoHistory(apiSearchResult: any): void {
+    const publishedDate: Date = new Date(apiSearchResult.snippet.publishedAt);
+    const newVideoInfo: VideoInfo = {
+      title: apiSearchResult.snippet.title,
+      videoURL: `https://www.youtube.com/watch?v=${apiSearchResult.id.videoId}`,
+      channelName: apiSearchResult.snippet.channelTitle,
+      channelURL: `https://www.youtube.com/channel/${apiSearchResult.snippet.channelId}`,
+      description: apiSearchResult.snippet.description,
       releaseDate: publishedDate.toLocaleDateString(
         'en-US', { 
           year: 'numeric', 
@@ -110,12 +119,12 @@ function App() {
           day: 'numeric'
         }
       ),
-      thumbnailURL: searchResult.snippet.thumbnails.medium.url,
+      thumbnailURL: apiSearchResult.snippet.thumbnails.medium.url,
     };
     const newVideoHistory = [...videoHistory];
     newVideoHistory[roundNumber] 
-      ? newVideoHistory[roundNumber].push(newSearchResult)
-      : newVideoHistory[roundNumber] = [newSearchResult];
+      ? newVideoHistory[roundNumber].push(newVideoInfo)
+      : newVideoHistory[roundNumber] = [newVideoInfo];
     setVideoHistory(newVideoHistory);
     console.log('Current video history',newVideoHistory);
   }
