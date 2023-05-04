@@ -1,0 +1,40 @@
+@import '/src/variables.scss';
+
+.video-browser {
+  background: $secondary-color;
+  color: white;
+  font-size: 13px;
+  flex-grow: 1;
+  overflow-y: auto;
+  border-radius: 5px;
+  border: 2px solid $tertiary-color;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  .section-header {
+    font-size: 20px;
+    position: sticky;
+    top: 0;
+    background: $tertiary-color;
+    display: flex;
+    justify-content: space-between;
+    div {
+      margin: 0 20px;
+    }
+  }
+  .video-card {
+    display: flex;
+    align-items: center;
+    &:last-of-type {
+      padding-bottom: 25%;
+    }
+    a {
+      color: $primary-color;
+    }
+    .thumbnail {
+      margin-right: 16px;
+      width: 240px;
+    }
+  }
+}

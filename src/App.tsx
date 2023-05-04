@@ -6,18 +6,9 @@ import ReactPlayer from 'react-player/youtube';
 import StandardButton from './reusable-components/buttons/standard-button';
 import InputButton from './reusable-components/buttons/input-button';
 import MysteryWord from './reusable-components/mystery-word/mystery-word';
+import VideoBrowser from './reusable-components/video-browser/video-browser'
 import HPBar from './reusable-components/hp-bar/hp-bar';
 
-type GameState = 'menu' | 'playing' | 'gameover' | 'roundover';
-type VideoInfo = {
-  title: string;
-  videoURL: string;
-  channelName: string;
-  channelURL: string;
-  description: string;
-  releaseDate: string;
-  thumbnailURL: string;
-};
 const mysteryWordsFile = require('./words.txt');
 
 function App() {
@@ -107,6 +98,7 @@ function App() {
   function addToVideoHistory(apiSearchResult: any): void {
     const publishedDate: Date = new Date(apiSearchResult.snippet.publishedAt);
     const newVideoInfo: VideoInfo = {
+      prompt: `${userWord} ${mysteryWord}`,
       title: apiSearchResult.snippet.title,
       videoURL: `https://www.youtube.com/watch?v=${apiSearchResult.id.videoId}`,
       channelName: apiSearchResult.snippet.channelTitle,
@@ -114,8 +106,8 @@ function App() {
       description: apiSearchResult.snippet.description,
       releaseDate: publishedDate.toLocaleDateString(
         'en-US', { 
-          year: 'numeric', 
-          month: 'long', 
+          year: 'numeric',
+          month: 'long',
           day: 'numeric'
         }
       ),
@@ -264,6 +256,9 @@ function App() {
           <div className="game-over-screen">
             <div>GAME OVER</div>
             <div>Final score: {currentScore.toString().padStart(6,'0')}</div>
+            <VideoBrowser
+              videoHistory={videoHistory}
+            />
           </div>
           }
           {gameState==='menu' && 
