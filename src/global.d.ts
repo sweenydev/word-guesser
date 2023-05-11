@@ -10,3 +10,4 @@ declare type VideoInfo = {
 };
 
 declare type GameState = 'menu' | 'playing' | 'gameover' | 'roundover';
+declare type GameMode = 'speed' | 'endurance';

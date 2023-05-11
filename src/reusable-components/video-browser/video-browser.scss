@@ -6,8 +6,9 @@
   font-size: 13px;
   flex-grow: 1;
   overflow-y: auto;
-  border-radius: 5px;
+  border-radius: 10px;
   border: 2px solid $tertiary-color;
+  margin: 5px;
   scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;

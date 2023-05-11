@@ -30,9 +30,6 @@ const MysteryWord: React.FC<MysteryWordProps> = forwardRef(({ mysteryWord, class
   useImperativeHandle(ref, () => ({
     revealLetter,
   }));
-  
-  // Random key is used to ensure the css rainbow cycle restarts with render changes
-  const randomKeyPiece = Math.random();
 
   return (
     <span className={`mystery-word ${classNames ? classNames : ''}`}>
@@ -40,7 +37,7 @@ const MysteryWord: React.FC<MysteryWordProps> = forwardRef(({ mysteryWord, class
         if (revealedLetterIndices.includes(i)) {
           return <span key={i} className='revealed-letter'>{letter}</span>
         } else {
-          return <span key={i+randomKeyPiece} className='hidden-letter'>?</span>
+          return <span key={i+'hidden'} className='hidden-letter'>?</span>
         }
       })}
     </span>

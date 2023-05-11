@@ -6,10 +6,25 @@ import ReactPlayer from 'react-player/youtube';
 import StandardButton from './reusable-components/buttons/standard-button';
 import InputButton from './reusable-components/buttons/input-button';
 import MysteryWord from './reusable-components/mystery-word/mystery-word';
-import VideoBrowser from './reusable-components/video-browser/video-browser'
+import VideoBrowser from './reusable-components/video-browser/video-browser';
 import HPBar from './reusable-components/hp-bar/hp-bar';
 
 const mysteryWordsFile = require('./words.txt');
+
+//Use to track total round times for final speed score
+class Timer {
+  private startTime: number = 0;
+  private endTime: number = 0;
+
+  start(): void {
+    this.startTime = Date.now();
+  }
+
+  stop(): number {
+    this.endTime = Date.now();
+    return this.endTime - this.startTime;
+  }
+}
 
 function App() {
   const wordsList = useRef<Array<string>>([]);
@@ -27,7 +42,9 @@ function App() {
   const [videoId, setVideoId] = useState<string>('dQw4w9WgXcQ');
   const [confettiFalling, setConfettiFalling] = useState<boolean>(false);
   const [gameState, setGameState] = useState<GameState>('menu');
+  const [gameMode, setGameMode] = useState<GameMode>();
   const [roundNumber, setRoundNumber] = useState<number>(0);
+  const [roundTimeLeft, setRoundTimeLeft] = useState<number>();
   const [videoHistory, setVideoHistory] = useState<Array<Array<VideoInfo>>>([]);
 
   const hintPointCosts = {
@@ -38,6 +55,8 @@ function App() {
     revealLetter: () => -1 * Math.floor(75 / mysteryWord.length),
     newMysteryWord: -15,
   };
+
+  const roundTimeLimit: number = 120000;
 
   /** Prepare words list and setup youtube api. This code will only run when component mounts */
   useEffect(() => {
@@ -65,6 +84,19 @@ function App() {
     searchVids();
   }, [userWord, mysteryWord, searchIndex]);
   
+  
+  useEffect(() => {
+    if (roundTimeLeft !== undefined) {
+      if (roundTimeLeft > 0) {
+        setTimeout(() => {
+          setRoundTimeLeft(roundTimeLeft - 100);
+        }, 50);
+      } else {
+        setGameState('gameover');
+      }
+    }
+  }, [roundTimeLeft]);
+
   /**
    * Searches Youtube for a video based on userWord and mysteryWord or uses previously fetched data.
    * @returns A Promise that resolves with void when the function completes.
@@ -127,13 +159,18 @@ function App() {
    * @param initUserWord The initial user word to use in the game.
    * @returns void if the initUserWord parameter is empty, otherwise returns "incorrect" for inputbutton animation.
    */
-  function startGame(gameMode: string, initUserWord: string): void | string {
+  function startGame(gameMode: GameMode, initUserWord: string): void | string {
     if (!initUserWord) return 'incorrect';
     generateNewMysteryWord(true);
     changeUserWord(initUserWord, true);
     setHintPoints(100);
-    setCurrentScore(0);
     setGameState('playing');
+    setGameMode(gameMode);
+    if (gameMode === 'endurance') {
+      setCurrentScore(0);
+    } else if (gameMode === 'speed') {
+      setRoundTimeLeft(roundTimeLimit);
+    }
   }
 
   /**
@@ -294,9 +331,12 @@ function App() {
           </div>
           <div className="score-board">
             <div className="hint-points">
-              Hint Points:
+              {gameMode === 'speed' ? 'Time Left:' : 'Hint Points:'}
               <div className="hp-bar-container">
-                <HPBar maxHP={100} currentHP={hintPoints}/>
+                {gameMode==='speed'  && roundTimeLeft
+                  ? <HPBar maxHP={roundTimeLimit} currentHP={roundTimeLeft} isTimer={true}/>
+                  : <HPBar maxHP={100} currentHP={hintPoints}/>
+                }
               </div>
             </div>
             <span className="score">Score: {currentScore.toString().padStart(6,'0')}</span>
