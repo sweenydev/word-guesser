@@ -9,8 +9,7 @@
   user-select: none;
   font-size: 1.7vh;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
   text-align: center;
   white-space: pre-wrap;
   &.hint {
@@ -39,6 +38,20 @@
   }
   &:hover {
     cursor: pointer;
+  }
+  .primary-text, .secondary-text {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .primary-text {
+    flex: 1.5;
+    align-items: flex-end;
+  }
+  .secondary-text {
+    flex: 1;
+    align-items: center;
+    font-size: 1.4vh;
   }
   transition: all .25s ease-in-out; 
 }

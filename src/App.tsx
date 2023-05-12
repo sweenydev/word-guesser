@@ -1,5 +1,5 @@
 import './App.scss';
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Confetti from 'react-confetti';
 import ReactPlayer from 'react-player/youtube';
@@ -8,6 +8,7 @@ import InputButton from './reusable-components/buttons/input-button';
 import MysteryWord from './reusable-components/mystery-word/mystery-word';
 import VideoBrowser from './reusable-components/video-browser/video-browser';
 import HPBar from './reusable-components/hp-bar/hp-bar';
+import { formatTime } from './util';
 
 const mysteryWordsFile = require('./words.txt');
 
@@ -42,18 +43,26 @@ function App() {
   const [videoId, setVideoId] = useState<string>('dQw4w9WgXcQ');
   const [confettiFalling, setConfettiFalling] = useState<boolean>(false);
   const [gameState, setGameState] = useState<GameState>('menu');
-  const [gameMode, setGameMode] = useState<GameMode>();
+  const [gameMode, setGameMode] = useState<GameMode>('endurance');
   const [roundNumber, setRoundNumber] = useState<number>(0);
   const [roundTimeLeft, setRoundTimeLeft] = useState<number>();
   const [videoHistory, setVideoHistory] = useState<Array<Array<VideoInfo>>>([]);
 
-  const hintPointCosts = {
-    incorrectGuess: -2,
-    correctGuess: () => Math.floor((100-hintPoints)/4) + 5,
-    changeWord: -5,
-    nextVideo: -3,
-    revealLetter: () => -1 * Math.floor(75 / mysteryWord.length),
-    newMysteryWord: -15,
+  const hintCosts = {
+    endurance : {
+      incorrectGuess: -2,
+      changeWord: -5,
+      nextVideo: -3,
+      revealLetter: () => -1 * Math.floor(75 / mysteryWord.length),
+      newMysteryWord: -15,
+    },
+    speed: {
+      incorrectGuess: 0,
+      changeWord: -5000,
+      nextVideo: 0,
+      revealLetter: () => -1000 * Math.floor(roundTimeLimit / mysteryWord.length / 1000),
+      newMysteryWord: -10000,
+    },
   };
 
   const roundTimeLimit: number = 120000;
@@ -89,8 +98,8 @@ function App() {
     if (roundTimeLeft !== undefined) {
       if (roundTimeLeft > 0) {
         setTimeout(() => {
-          setRoundTimeLeft(roundTimeLeft - 100);
-        }, 50);
+          setRoundTimeLeft(prevRoundTimeLeft => (prevRoundTimeLeft || 0) - 100);
+        }, 100);
       } else {
         setGameState('gameover');
       }
@@ -194,7 +203,11 @@ function App() {
   function generateNewMysteryWord(isFree?:boolean): void {
     setMysteryWord(wordsList.current[Math.floor(Math.random() * wordsList.current.length) + 1]);
     setSearchIndex(0);
-    if (!isFree) changeHintPoints(hintPointCosts.newMysteryWord);
+    if (!isFree) {
+      gameMode==='endurance'
+        ? changeHintPoints(hintCosts[gameMode].newMysteryWord)
+        : setRoundTimeLeft((roundTimeLeft || 0) + hintCosts[gameMode].newMysteryWord);
+    }
   }
 
   /**
@@ -207,7 +220,11 @@ function App() {
     lastSearchedIndex.current = 0;
     setUserWord(newWord);
     setSearchIndex(0);
-    if (!isFree) changeHintPoints(hintPointCosts.changeWord);
+    if (!isFree) {
+      gameMode==='endurance'
+        ? changeHintPoints(hintCosts[gameMode].changeWord)
+        : setRoundTimeLeft((roundTimeLeft || 0) + hintCosts[gameMode].changeWord);
+    }
   }
   
   /**
@@ -216,7 +233,9 @@ function App() {
    */
   function revealLetter(): void {
     mysteryWordComponentRef.current?.revealLetter(); 
-    changeHintPoints(hintPointCosts.revealLetter());
+    gameMode==='endurance'
+      ? changeHintPoints(hintCosts[gameMode].revealLetter())
+      : setRoundTimeLeft((roundTimeLeft || 0) + hintCosts[gameMode].revealLetter());
   }
 
   function buyNextVideo(): void | string {
@@ -225,7 +244,9 @@ function App() {
       setVideosPurchased(newVideosPurchased);
       setSearchIndex(newVideosPurchased);
       addToVideoHistory(lastSearch.current[newVideosPurchased]);
-      changeHintPoints(hintPointCosts.nextVideo);
+      gameMode==='endurance'
+        ? changeHintPoints(hintCosts[gameMode].nextVideo)
+        : setRoundTimeLeft((roundTimeLeft || 0) + hintCosts[gameMode].nextVideo);
     } else {
       return 'incorrect';
     }
@@ -245,11 +266,13 @@ function App() {
       lastSearchedIndex.current = 0;
       changeUserWord(newWord ? newWord : userWord, true);
       generateNewMysteryWord(true);
-      changeHintPoints(hintPointCosts.correctGuess());
+      changeHintPoints(Math.floor((100-hintPoints)/4) + 5);
       setCurrentScore(currentScore+1);
       setRoundNumber(roundNumber+1);
     } else {
-      changeHintPoints(hintPointCosts.incorrectGuess);
+      gameMode==='endurance'
+        ? changeHintPoints(hintCosts[gameMode].incorrectGuess)
+        : setRoundTimeLeft((roundTimeLeft || 0) + hintCosts[gameMode].incorrectGuess);
       return 'incorrect';
     }
   }
@@ -333,7 +356,7 @@ function App() {
             <div className="hint-points">
               {gameMode === 'speed' ? 'Time Left:' : 'Hint Points:'}
               <div className="hp-bar-container">
-                {gameMode==='speed'  && roundTimeLeft
+                {gameMode==='speed' && roundTimeLeft
                   ? <HPBar maxHP={roundTimeLimit} currentHP={roundTimeLeft} isTimer={true}/>
                   : <HPBar maxHP={100} currentHP={hintPoints}/>
                 }
@@ -358,32 +381,57 @@ function App() {
               <div className="grid-item">
                 <InputButton 
                   classNames={`hint`} 
-                  buttonText={`Guess Mystery Word\n(${-1*hintPointCosts.incorrectGuess} HP)`} 
+                  buttonText={`Guess Mystery Word`}
+                  secondaryButtonText={
+                    gameMode==='endurance'
+                      ? `${-1*hintCosts[gameMode].incorrectGuess} HP`
+                      : `-${formatTime(-1*hintCosts[gameMode].incorrectGuess)}`
+                  }
                   clickHandler={checkAnswer} 
                   placeholder={`Enter Your Guess Here`}/>
               </div>
               <div className="grid-item">
                 <InputButton 
                   classNames={`hint`} 
-                  buttonText={`Change Your Word\n(${-1*hintPointCosts.changeWord} HP)`} 
+                  buttonText={`Change Your Word`} 
+                  secondaryButtonText={
+                    gameMode==='endurance'
+                      ? `${-1*hintCosts[gameMode].changeWord} HP`
+                      : `-${formatTime(-1*hintCosts[gameMode].changeWord)}`
+                  }
                   clickHandler={changeUserWord}
                   placeholder={`Enter Your Word Here`}/>
               </div>
               <div className="grid-item">
                 <StandardButton 
                   classNames={`hint`} 
-                  buttonText={`Buy Next Video\n(${-1*hintPointCosts.nextVideo} HP)\n(Videos Purchased: ${videosPurchased} / 10)`} 
+                  buttonText={`Buy Next Video`} 
+                  secondaryButtonText={
+                    gameMode==='endurance'
+                      ? `${-1*hintCosts[gameMode].nextVideo} HP\n(Videos Purchased: ${videosPurchased} / 10)`
+                      : `-${formatTime(-1*hintCosts[gameMode].nextVideo)}\n(Videos Purchased: ${videosPurchased} / 10)`
+                  }
                   clickHandler={buyNextVideo} />
               </div>
               <div className="grid-item">
                 <StandardButton 
                   classNames={`hint`} 
-                  buttonText={`Reveal Random Letter\n(${-1*hintPointCosts.revealLetter()} HP)`} 
+                  buttonText={`Reveal Random Letter`} 
+                  secondaryButtonText={
+                    gameMode==='endurance' 
+                      ? `${-1*hintCosts[gameMode].revealLetter()} HP`
+                      : `-${formatTime(-1*hintCosts[gameMode].revealLetter())}`
+                  }
                   clickHandler={revealLetter} />
               </div>
                 <StandardButton 
                   classNames={`hint`} 
-                  buttonText={`New Mystery Word\n(${-1*hintPointCosts.newMysteryWord} HP)`} 
+                  buttonText={`New Mystery Word`} 
+                  secondaryButtonText={
+                    gameMode==='endurance'
+                      ? `${-1*hintCosts[gameMode].newMysteryWord} HP`
+                      : `-${formatTime(-1*hintCosts[gameMode].newMysteryWord)}`
+                  }
                   clickHandler={()=>{generateNewMysteryWord(false)}} />
             </div>
             

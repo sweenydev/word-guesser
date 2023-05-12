@@ -4,6 +4,7 @@ import './buttons.scss';
 
 interface InputButtonProps {
   buttonText: string;
+  secondaryButtonText?: string;
   clickHandler(inputValue: string): any;
   classNames?: string;
   placeholder?: string;
@@ -12,11 +13,12 @@ interface InputButtonProps {
 /**
  * An input button component with optional classes and placeholder.
  * @param {string} buttonText - The text to be displayed on the button.
+ * @param {string} secondaryButtonText - (Optional) The text to be displayed below the buttonText
  * @param {(inputValue: string) => any} clickHandler - The function to be called when the button is clicked. It receives the current input value as string parameter and returns any value.
  * @param {string} [classNames] - (Optional) classes to be added to the component button and input.
  * @param {string} [placeholder] - (Optional) placeholder to be displayed inside the input field.
  */
-const InputButton: React.FC<InputButtonProps> = ({ buttonText, clickHandler, classNames, placeholder }) => {
+const InputButton: React.FC<InputButtonProps> = ({ buttonText, secondaryButtonText, clickHandler, classNames, placeholder }) => {
   const [input, setInput] = useState('');
   const [runIncorrectAnimation, setRunIncorrectAnimation] = useState<boolean>(false);
   
@@ -34,7 +36,7 @@ const InputButton: React.FC<InputButtonProps> = ({ buttonText, clickHandler, cla
 
   return (
     <div style={{display:`inline-flex`, width:`100%`}}>
-      <StandardButton classNames={`input ${classNames}`} buttonText={buttonText} clickHandler={onClick} />
+      <StandardButton classNames={`input ${classNames}`} buttonText={buttonText} secondaryButtonText={secondaryButtonText} clickHandler={onClick} />
       <input
         className={`button-input-text ${classNames} ${runIncorrectAnimation ? 'incorrect' : ''}`}
         type="text"
