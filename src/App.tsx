@@ -49,7 +49,7 @@ function App() {
   const [videoHistory, setVideoHistory] = useState<Array<Array<VideoInfo>>>([]);
 
   const hintCosts = {
-    endurance : {
+    endurance: {
       incorrectGuess: -2,
       changeWord: -5,
       nextVideo: -3,
@@ -384,8 +384,8 @@ function App() {
                   buttonText={`Guess Mystery Word`}
                   secondaryButtonText={
                     gameMode==='endurance'
-                      ? `${-1*hintCosts[gameMode].incorrectGuess} HP`
-                      : `-${formatTime(-1*hintCosts[gameMode].incorrectGuess)}`
+                      ? `-${-1*hintCosts[gameMode].incorrectGuess} HP`
+                      : `FREE`
                   }
                   clickHandler={checkAnswer} 
                   placeholder={`Enter Your Guess Here`}/>
@@ -396,7 +396,7 @@ function App() {
                   buttonText={`Change Your Word`} 
                   secondaryButtonText={
                     gameMode==='endurance'
-                      ? `${-1*hintCosts[gameMode].changeWord} HP`
+                      ? `-${-1*hintCosts[gameMode].changeWord} HP`
                       : `-${formatTime(-1*hintCosts[gameMode].changeWord)}`
                   }
                   clickHandler={changeUserWord}
@@ -408,8 +408,8 @@ function App() {
                   buttonText={`Buy Next Video`} 
                   secondaryButtonText={
                     gameMode==='endurance'
-                      ? `${-1*hintCosts[gameMode].nextVideo} HP\n(Videos Purchased: ${videosPurchased} / 10)`
-                      : `-${formatTime(-1*hintCosts[gameMode].nextVideo)}\n(Videos Purchased: ${videosPurchased} / 10)`
+                      ? `-${-1*hintCosts[gameMode].nextVideo} HP\n(Videos Purchased: ${videosPurchased} / 10)`
+                      : `FREE\n(Videos Purchased: ${videosPurchased} / 10)`
                   }
                   clickHandler={buyNextVideo} />
               </div>
@@ -419,7 +419,7 @@ function App() {
                   buttonText={`Reveal Random Letter`} 
                   secondaryButtonText={
                     gameMode==='endurance' 
-                      ? `${-1*hintCosts[gameMode].revealLetter()} HP`
+                      ? `-${-1*hintCosts[gameMode].revealLetter()} HP`
                       : `-${formatTime(-1*hintCosts[gameMode].revealLetter())}`
                   }
                   clickHandler={revealLetter} />
@@ -429,7 +429,7 @@ function App() {
                   buttonText={`New Mystery Word`} 
                   secondaryButtonText={
                     gameMode==='endurance'
-                      ? `${-1*hintCosts[gameMode].newMysteryWord} HP`
+                      ? `-${-1*hintCosts[gameMode].newMysteryWord} HP`
                       : `-${formatTime(-1*hintCosts[gameMode].newMysteryWord)}`
                   }
                   clickHandler={()=>{generateNewMysteryWord(false)}} />

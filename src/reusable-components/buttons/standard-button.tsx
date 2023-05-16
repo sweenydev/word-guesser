@@ -17,8 +17,10 @@ interface StandardButtonProps {
 const StandardButton: React.FC<StandardButtonProps> = ({ buttonText, secondaryButtonText, clickHandler, classNames }) => {
   return (
     <div onClick={clickHandler} className={`button ${classNames}`}>
-      <div className="primary-text">{buttonText}</div>
-      <div className="secondary-text">{secondaryButtonText}</div>
+      <div className={`primary-text${secondaryButtonText ? ' has-secondary' : ''}`}>{buttonText}</div>
+      {secondaryButtonText &&
+        <div className="secondary-text">{secondaryButtonText}</div>
+      }
     </div>
   )
 }
