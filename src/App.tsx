@@ -12,7 +12,7 @@ import { formatTime } from './util';
 
 const mysteryWordsFile = require('./words.txt');
 
-//Use to track total round times for final speed score
+//TODO: Use to track total round times for final speed score
 class Timer {
   private startTime: number = 0;
   private endTime: number = 0;
@@ -48,12 +48,12 @@ function App() {
   const [roundTimeLeft, setRoundTimeLeft] = useState<number>();
   const [videoHistory, setVideoHistory] = useState<Array<Array<VideoInfo>>>([]);
 
-  const hintCosts = {
+  const hintCosts: { [key in GameMode]: HintCosts }= { 
     endurance: {
       incorrectGuess: -2,
       changeWord: -5,
       nextVideo: -3,
-      revealLetter: () => -1 * Math.floor(75 / mysteryWord.length),
+      revealLetter: () => -1 * Math.floor(90 / mysteryWord.length),
       newMysteryWord: -15,
     },
     speed: {
@@ -163,6 +163,26 @@ function App() {
   }
 
   /**
+   * Charges the user for the cost of a hint based on the current game mode.
+   * @param {keyof HintCosts} hintType - The key for the type of hint being used.
+   * @returns {void}
+   */ 
+  function chargeHintCost(hintType: keyof HintCosts): void {
+    let hintCost: any = hintCosts[gameMode][hintType];
+    if(typeof hintCost === 'function') hintCost = hintCost();
+    switch(gameMode) {
+      case 'endurance': 
+        changeHintPoints(hintCost);
+        break;
+      case 'speed':
+        setRoundTimeLeft((roundTimeLeft || 0) + hintCost);
+        break;
+      default:
+        console.log(`Add a chargeHintCost case for ${gameMode}!`)
+    }
+  }
+
+  /**
    * Starts a new game with given game mode and user word.
    * @param gameMode The chosen game mode. (TODO, add game modes)
    * @param initUserWord The initial user word to use in the game.
@@ -203,11 +223,7 @@ function App() {
   function generateNewMysteryWord(isFree?:boolean): void {
     setMysteryWord(wordsList.current[Math.floor(Math.random() * wordsList.current.length) + 1]);
     setSearchIndex(0);
-    if (!isFree) {
-      gameMode==='endurance'
-        ? changeHintPoints(hintCosts[gameMode].newMysteryWord)
-        : setRoundTimeLeft((roundTimeLeft || 0) + hintCosts[gameMode].newMysteryWord);
-    }
+    if (!isFree) chargeHintCost('newMysteryWord');
   }
 
   /**
@@ -220,11 +236,7 @@ function App() {
     lastSearchedIndex.current = 0;
     setUserWord(newWord);
     setSearchIndex(0);
-    if (!isFree) {
-      gameMode==='endurance'
-        ? changeHintPoints(hintCosts[gameMode].changeWord)
-        : setRoundTimeLeft((roundTimeLeft || 0) + hintCosts[gameMode].changeWord);
-    }
+    if (!isFree) chargeHintCost('changeWord');
   }
   
   /**
@@ -233,9 +245,7 @@ function App() {
    */
   function revealLetter(): void {
     mysteryWordComponentRef.current?.revealLetter(); 
-    gameMode==='endurance'
-      ? changeHintPoints(hintCosts[gameMode].revealLetter())
-      : setRoundTimeLeft((roundTimeLeft || 0) + hintCosts[gameMode].revealLetter());
+    chargeHintCost('revealLetter');
   }
 
   function buyNextVideo(): void | string {
@@ -244,9 +254,7 @@ function App() {
       setVideosPurchased(newVideosPurchased);
       setSearchIndex(newVideosPurchased);
       addToVideoHistory(lastSearch.current[newVideosPurchased]);
-      gameMode==='endurance'
-        ? changeHintPoints(hintCosts[gameMode].nextVideo)
-        : setRoundTimeLeft((roundTimeLeft || 0) + hintCosts[gameMode].nextVideo);
+      chargeHintCost('nextVideo');
     } else {
       return 'incorrect';
     }
@@ -270,9 +278,7 @@ function App() {
       setCurrentScore(currentScore+1);
       setRoundNumber(roundNumber+1);
     } else {
-      gameMode==='endurance'
-        ? changeHintPoints(hintCosts[gameMode].incorrectGuess)
-        : setRoundTimeLeft((roundTimeLeft || 0) + hintCosts[gameMode].incorrectGuess);
+      chargeHintCost('incorrectGuess');
       return 'incorrect';
     }
   }
