@@ -7,7 +7,7 @@
   padding: 3px 5px;
   margin: 10px;
   user-select: none;
-  font-size: 1.7vh;
+  font-size: calc(2.3vmin);
   display: flex;
   flex-direction: column;
   text-align: center;
@@ -52,14 +52,14 @@
     }
   }
   .secondary-text {
-    font-size: 1.4vh;
+    font-size: calc(1.5vmin);
   }
   transition: all .25s ease-in-out; 
 }
 
 .button-input-text {
   z-index: 2;
-  font-size: 2.3vh;
+  font-size: calc(2vmin);
   height: 8vh;
   margin: 10px 10px 0 0;
   border-radius: 0 10px 10px 0;
@@ -68,7 +68,7 @@
   flex-basis: 50%;
   &::placeholder {
     color: $tertiary-color;
-    font-size: 2vh;
+    font-size: calc(1.8vmin);
   }
   &:focus {
     outline: none;

@@ -33,6 +33,7 @@ function App() {
   const lastSearchedIndex = useRef<number>(0);
   const youtube = useRef<any>(null);
   const mysteryWordComponentRef = useRef<any>(null);
+  const timeChange = useRef<number>(0);
 
   const [userWord, setUserWord] = useState<string>('');
   const [mysteryWord, setMysteryWord] = useState<string>('');
@@ -53,14 +54,14 @@ function App() {
       incorrectGuess: -2,
       changeWord: -5,
       nextVideo: -3,
-      revealLetter: () => -1 * Math.floor(90 / mysteryWord.length),
+      revealLetter: () => -1 * Math.floor(100 / mysteryWord.length),
       newMysteryWord: -15,
     },
     speed: {
       incorrectGuess: 0,
       changeWord: -5000,
       nextVideo: 0,
-      revealLetter: () => -1000 * Math.floor(roundTimeLimit / mysteryWord.length / 1000),
+      revealLetter: () => -2000 * Math.floor((roundTimeLeft || 0) / mysteryWord.length / 1000) - 5000,
       newMysteryWord: -10000,
     },
   };
@@ -93,12 +94,13 @@ function App() {
     searchVids();
   }, [userWord, mysteryWord, searchIndex]);
   
-  
+  /** Counting and gameover logic for countdown timer, updates every 100 ms when roundTimeLeft is defined */
   useEffect(() => {
     if (roundTimeLeft !== undefined) {
       if (roundTimeLeft > 0) {
         setTimeout(() => {
-          setRoundTimeLeft(prevRoundTimeLeft => (prevRoundTimeLeft || 0) - 100);
+          setRoundTimeLeft(prevRoundTimeLeft => (prevRoundTimeLeft || 0) - 100 + timeChange.current);
+          if (timeChange.current !== 0) timeChange.current = 0;
         }, 100);
       } else {
         setGameState('gameover');
@@ -175,7 +177,7 @@ function App() {
         changeHintPoints(hintCost);
         break;
       case 'speed':
-        setRoundTimeLeft((roundTimeLeft || 0) + hintCost);
+        timeChange.current += hintCost;
         break;
       default:
         console.log(`Add a chargeHintCost case for ${gameMode}!`)
@@ -330,7 +332,6 @@ function App() {
           {gameState==='menu' && 
           <div className="menu-screen">
             <div>VIDEO GUESSER</div>
-            <div>[placeholder title screen art]</div>
           </div>
           }
         </div>

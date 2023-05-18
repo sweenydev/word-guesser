@@ -15,14 +15,13 @@ body {
   color: white;
   &::before {
     content: '';
-    background-image: url(./img/bubbly.png);
+    background-image: url(./img/backgroundtexture.png);
     background-repeat: repeat;
-    background-size: 200px;
-    filter: saturate(65%) blur(2.7px);
+    background-size: 100px;
     position: absolute;
     width: 150vw;
     height:  150vh;
-    animation: bubbles-illusion 35s linear infinite;
+    animation: bubbles-illusion 50s linear infinite;
     z-index: -1;
   }
 }
@@ -156,7 +155,7 @@ $screen-height: 44vh;
   margin: 0 20px;
   border: 4px solid $tertiary-color;
   border-radius: 20px;
-  background: $secondary-color;
+  background-color: rgba($secondary-color, 0.955);
   min-width: 75%;
   max-width: 100%;
   .grid-container {
