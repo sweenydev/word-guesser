@@ -187,13 +187,13 @@ $screen-height: 44vh;
 @keyframes bubbles-illusion {
   0%{
     background-position: 0px 0px;
-    transform:skewX(-5deg);
+    transform:skewX(-1.5deg);
   }
   50%{
-    transform:skewX(5deg);
+    transform:skewX(1.5deg);
   }
   100%{
     background-position: 0px -400px;
-    transform:skewX(-5deg);
+    transform:skewX(-1.5deg);
   }
 }

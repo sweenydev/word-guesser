@@ -61,7 +61,7 @@ function App() {
       incorrectGuess: 0,
       changeWord: -5000,
       nextVideo: 0,
-      revealLetter: () => -2000 * Math.floor((roundTimeLeft || 0) / mysteryWord.length / 1000) - 5000,
+      revealLetter: () => -1000 * Math.floor((roundTimeLeft || 0) / mysteryWord.length / 500) - 5000,
       newMysteryWord: -10000,
     },
   };
