@@ -13,19 +13,19 @@ import { formatTime } from './util';
 const mysteryWordsFile = require('./words.txt');
 
 //TODO: Use to track total round times for final speed score
-class Timer {
-  private startTime: number = 0;
-  private endTime: number = 0;
+// class Timer {
+//   private startTime: number = 0;
+//   private endTime: number = 0;
 
-  start(): void {
-    this.startTime = Date.now();
-  }
+//   start(): void {
+//     this.startTime = Date.now();
+//   }
 
-  stop(): number {
-    this.endTime = Date.now();
-    return this.endTime - this.startTime;
-  }
-}
+//   stop(): number {
+//     this.endTime = Date.now();
+//     return this.endTime - this.startTime;
+//   }
+// }
 
 function App() {
   const wordsList = useRef<Array<string>>([]);

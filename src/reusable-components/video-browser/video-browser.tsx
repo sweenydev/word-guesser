@@ -8,7 +8,7 @@ interface VideoBrowserProps {
 function VideoCard({ video }: { video: VideoInfo }): JSX.Element {
   return (
     <div className="video-card">
-      <img className="thumbnail" src={video.thumbnailURL} />
+      <img className="thumbnail" src={video.thumbnailURL} alt={video.title} />
       <div>
         <div>
           <a href={video.videoURL} target="_blank">{video.title}</a>
