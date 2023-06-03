@@ -9,6 +9,7 @@ import MysteryWord from './reusable-components/mystery-word/mystery-word';
 import VideoBrowser from './reusable-components/video-browser/video-browser';
 import HPBar from './reusable-components/hp-bar/hp-bar';
 import { formatTime } from './util';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 const mysteryWordsFile = require('./words.txt');
 
@@ -74,16 +75,20 @@ function App() {
       wordsList.current = text.split('\r\n');
     });
     const fetchData = async () => {
-      const response = await fetch('http://localhost:4000/api/data');
-      const jsonData = await response.json();
-      youtube.current = axios.create({
-        baseURL: 'https://www.googleapis.com/youtube/v3',
-        params: {
-          part:'snippet',
-          type:'video',
-          maxResults: 11,
-          key: jsonData.youtubeApiKey
-        }
+      const getYoutubeApiKey = httpsCallable(getFunctions(), 'getYoutubeApiKey');
+      getYoutubeApiKey().then((result) => {
+        const newData: any = result.data ? result.data : result;
+        youtube.current = axios.create({
+          baseURL: 'https://www.googleapis.com/youtube/v3',
+          params: {
+            part:'snippet',
+            type:'video',
+            maxResults: 11,
+            key: newData.youtubeApiKey
+          }
+        });
+      }).catch((error) => {
+        console.log('Firebase error:', error);
       });
     };
     fetchData();
@@ -331,7 +336,7 @@ function App() {
           }
           {gameState==='menu' && 
           <div className="menu-screen">
-            <div>VIDEO GUESSER</div>
+            <div>WORD PLAYER</div>
           </div>
           }
         </div>
