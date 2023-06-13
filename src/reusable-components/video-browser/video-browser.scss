@@ -16,6 +16,7 @@
   .section-header {
     font-size: 20px;
     position: sticky;
+    border-radius: 5px 5px 0 0;
     top: 0;
     background: $tertiary-color;
     display: flex;
@@ -35,29 +36,28 @@
       margin-bottom: 15%;
     }
     .thumbnail {
-      max-width: calc(100%/3.5);
+      max-width: calc(100%/3.4);
       height: auto;
       object-fit: cover;
       margin-right: 10px;
-      border-radius: 5px;
+      border-radius: 7px;
       transition: transform 0.3s;
-      border: 2px solid $tertiary-color;
       &:hover {
-        transform: scale(1.25) translateX(10px);
+        transform: scale(1.35) translateX(13px);
       }
     }
 
     .title {
-      font-size: 1.6vmin;
+      font-size: 1.65vmin;
       line-height: 1.7vmin;
     }
 
     .channel, .release-date, .views {
-      color: #999;
+      color: white;
     }
 
     .description {
-      color: #666;
+      color: #ccc;
     }
 
     .channel, .description {

@@ -178,13 +178,15 @@ function App() {
    */
   function startGame(gameMode: GameMode, initUserWord: string): void | string {
     if (!initUserWord) return 'incorrect';
+    setVideoHistory([]);
     generateNewMysteryWord(true);
     changeUserWord(initUserWord, true);
-    setHintPoints(100);
     setGameState('playing');
     setGameMode(gameMode);
+    setCurrentScore(0);
+    setRoundNumber(0);
     if (gameMode === 'endurance') {
-      setCurrentScore(0);
+      setHintPoints(100);
     } else if (gameMode === 'speed') {
       setRoundTimeLeft(roundTimeLimit);
     }
