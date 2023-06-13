@@ -1,3 +1,5 @@
+Play the alpha release now at https://wordplayer.web.app/ (currently only on desktop, mobile compatability should be ready soon)
+
 # Getting Started
 
 In order to run locally, you must set your youtube api key in a .env file at the root of the project as YOUTUBE_API_KEY=
