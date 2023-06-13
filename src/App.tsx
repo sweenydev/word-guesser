@@ -10,6 +10,22 @@ import VideoBrowser from './reusable-components/video-browser/video-browser';
 import HPBar from './reusable-components/hp-bar/hp-bar';
 import { formatTime } from './util';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCI5pnnoKyC9g1AHSN0qq_xkGc3bOaUSPk",
+  authDomain: "word-player-sweeny.firebaseapp.com",
+  projectId: "word-player-sweeny",
+  storageBucket: "word-player-sweeny.appspot.com",
+  messagingSenderId: "904947896904",
+  appId: "1:904947896904:web:0a2085a0fed5025e153e7d",
+  measurementId: "G-ZHFWCJ21E1"
+};
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const firebaseFunctions = getFunctions();
+const searchYoutube = httpsCallable(firebaseFunctions, 'searchYoutube');
 
 const mysteryWordsFile = require('./words.txt');
 
@@ -30,9 +46,8 @@ const mysteryWordsFile = require('./words.txt');
 
 function App() {
   const wordsList = useRef<Array<string>>([]);
-  const lastSearch = useRef<Array<any>>([]);
-  const lastSearchedIndex = useRef<number>(0);
-  const youtube = useRef<any>(null);
+  const currentSearch = useRef<Array<any>>([]);
+  const currentSearchedIndex = useRef<number>(0);
   const mysteryWordComponentRef = useRef<any>(null);
   const timeChange = useRef<number>(0);
 
@@ -42,7 +57,8 @@ function App() {
   const [currentScore, setCurrentScore] = useState<number>(0);
   const [searchIndex, setSearchIndex] = useState<number>(0);
   const [videosPurchased, setVideosPurchased] = useState<number>(0);
-  const [videoId, setVideoId] = useState<string>('dQw4w9WgXcQ');
+  const [videoId, setVideoId] = useState<string>('jYS6eEs_Hhs');
+  const [videoIsPlaying, setVideoIsPlaying] = useState<boolean>(false);
   const [confettiFalling, setConfettiFalling] = useState<boolean>(false);
   const [gameState, setGameState] = useState<GameState>('menu');
   const [gameMode, setGameMode] = useState<GameMode>('endurance');
@@ -69,29 +85,11 @@ function App() {
 
   const roundTimeLimit: number = 120000;
 
-  /** Prepare words list and setup youtube api. This code will only run when component mounts */
+  /** Prepare words list. This code will only run when component mounts */
   useEffect(() => {
     fetch(mysteryWordsFile).then(response => response.text()).then((text) => {
       wordsList.current = text.split('\r\n');
     });
-    const fetchData = async () => {
-      const getYoutubeApiKey = httpsCallable(getFunctions(), 'getYoutubeApiKey');
-      getYoutubeApiKey().then((result) => {
-        const newData: any = result.data ? result.data : result;
-        youtube.current = axios.create({
-          baseURL: 'https://www.googleapis.com/youtube/v3',
-          params: {
-            part:'snippet',
-            type:'video',
-            maxResults: 11,
-            key: newData.youtubeApiKey
-          }
-        });
-      }).catch((error) => {
-        console.log('Firebase error:', error);
-      });
-    };
-    fetchData();
   }, []);
 
   /** Run searchVids everytime there is a change to userWord, mysteryWord, or searchIndex, to generate and select new videos */
@@ -108,7 +106,7 @@ function App() {
           if (timeChange.current !== 0) timeChange.current = 0;
         }, 100);
       } else {
-        setGameState('gameover');
+        endGame();
       }
     }
   }, [roundTimeLeft]);
@@ -118,20 +116,20 @@ function App() {
    * @returns A Promise that resolves with void when the function completes.
    */
   async function searchVids(): Promise<void> {
-    if (searchIndex !== lastSearchedIndex.current) {
+    if (searchIndex !== currentSearchedIndex.current) {
       // Use previously fetched data on searchIndex increment
-      setVideoId(lastSearch.current[searchIndex].id.videoId); 
-      lastSearchedIndex.current = searchIndex;
+      setVideoId(currentSearch.current[searchIndex].videoId); 
+      currentSearchedIndex.current = searchIndex;
       console.log('old data used!','\nMYSTERY WORD', mysteryWord, '\nUSER WORD', userWord, '\nSEARCHINDEX', searchIndex);
     } 
     else if (userWord && mysteryWord) {
-      youtube.current.get('/search', {params: {q: `${userWord} ${mysteryWord}`}})
-      .then((res: { data: { items: any[]; }; }) => {
+      searchYoutube(`${userWord} ${mysteryWord}`).then(async (searchResults: any) => {
+        const newSearchResults: VideoInfo[] = searchResults.data;
         setVideosPurchased(0);
-        setVideoId(res.data.items[searchIndex].id.videoId);
-        addToVideoHistory(res.data.items[searchIndex]);
-        lastSearch.current = res.data.items;
-        lastSearchedIndex.current = searchIndex;
+        setVideoId(newSearchResults[searchIndex].videoId);
+        addToVideoHistory(newSearchResults[searchIndex]);
+        currentSearch.current = searchResults.data;
+        currentSearchedIndex.current = searchIndex;
         console.log('MYSTERY WORD:', mysteryWord, '\nUSER WORD:', userWord, '\nSEARCHINDEX:', searchIndex);
       })
       .catch((err: any) => console.log(err));
@@ -140,27 +138,10 @@ function App() {
 
   /**
    * Adds a new VideoInfo object to the video history array for the current round.
-   * @param {any} apiSearchResult - Object returned from youtube search api containing information about the searched video.
+   * @param {any} newVideoInfo - The youtube search result to add to the video history.
    * @returns {void}
    */
-  function addToVideoHistory(apiSearchResult: any): void {
-    const publishedDate: Date = new Date(apiSearchResult.snippet.publishedAt);
-    const newVideoInfo: VideoInfo = {
-      prompt: `${userWord} ${mysteryWord}`,
-      title: apiSearchResult.snippet.title,
-      videoURL: `https://www.youtube.com/watch?v=${apiSearchResult.id.videoId}`,
-      channelName: apiSearchResult.snippet.channelTitle,
-      channelURL: `https://www.youtube.com/channel/${apiSearchResult.snippet.channelId}`,
-      description: apiSearchResult.snippet.description,
-      releaseDate: publishedDate.toLocaleDateString(
-        'en-US', { 
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        }
-      ),
-      thumbnailURL: apiSearchResult.snippet.thumbnails.medium.url,
-    };
+  function addToVideoHistory(newVideoInfo: VideoInfo): void {
     const newVideoHistory = [...videoHistory];
     newVideoHistory[roundNumber] 
       ? newVideoHistory[roundNumber].push(newVideoInfo)
@@ -207,6 +188,12 @@ function App() {
     } else if (gameMode === 'speed') {
       setRoundTimeLeft(roundTimeLimit);
     }
+    setVideoIsPlaying(true);
+  }
+
+  function endGame(): void {
+    setGameState('gameover');
+    setVideoIsPlaying(false);
   }
 
   /**
@@ -218,7 +205,7 @@ function App() {
     const newHintPoints = Math.max(0, Math.min(hintPoints + pointChange, 100));
     setHintPoints(newHintPoints);
     if (newHintPoints === 0) {
-      setGameState('gameover');
+      endGame();
     }
   }
   
@@ -240,7 +227,7 @@ function App() {
    * @returns void.
    */
   function changeUserWord(newWord: string, isFree?: boolean): void {
-    lastSearchedIndex.current = 0;
+    currentSearchedIndex.current = 0;
     setUserWord(newWord);
     setSearchIndex(0);
     if (!isFree) chargeHintCost('changeWord');
@@ -260,7 +247,7 @@ function App() {
       const newVideosPurchased = videosPurchased + 1
       setVideosPurchased(newVideosPurchased);
       setSearchIndex(newVideosPurchased);
-      addToVideoHistory(lastSearch.current[newVideosPurchased]);
+      addToVideoHistory(currentSearch.current[newVideosPurchased]);
       chargeHintCost('nextVideo');
     } else {
       return 'incorrect';
@@ -278,7 +265,7 @@ function App() {
       changeConfettiFalling(true);
       //TODO: Add pre round new word selection menu
       const newWord = null;//prompt('Correct! Choose Your Next Word (leave blank to use previous word)');
-      lastSearchedIndex.current = 0;
+      currentSearchedIndex.current = 0;
       changeUserWord(newWord ? newWord : userWord, true);
       generateNewMysteryWord(true);
       changeHintPoints(Math.floor((100-hintPoints)/4) + 5);
@@ -311,7 +298,7 @@ function App() {
             numberOfPieces={10000}
             opacity={0.8}
             gravity={0.05}
-            initialVelocityY={40}
+            initialVelocityY={120}
             tweenDuration={10000}
             recycle={false}
             colors={[ //REFERENCE: $rainbow-colors in variables.scss
@@ -346,7 +333,7 @@ function App() {
             width="100%"
             height="100%"
             pip={false}
-            playing={true}
+            playing={videoIsPlaying}
             config={{
               playerVars: { autoplay: 1 }
             }}

@@ -10,17 +10,15 @@ function VideoCard({ video }: { video: VideoInfo }): JSX.Element {
     <div className="video-card">
       <img className="thumbnail" src={video.thumbnailURL} alt={video.title} />
       <div>
-        <div>
-          <a href={video.videoURL} target="_blank">{video.title}</a>
+        <div className="title">
+          <a href={`https://www.youtube.com/watch?v=${video.videoId}`} target="_blank">{video.title}</a>
         </div>
-        <div>
-          By{' '}
-          <a href={video.channelURL} target="_blank">
-            {video.channelName}
-          </a>
+        <div className="channel">
+          By <a href={`https://www.youtube.com/channel/${video.channelId}`} target="_blank">{video.channelName}</a>
         </div>
-        <div>{video.description}</div>
-        <div>Released on {video.releaseDate}</div>
+        <div className="description">{video.description}</div>
+        <div className="release-date">Released {video.releaseDate}</div>
+        <div className="views">Views: {video.views.toLocaleString('en-US')}</div>
       </div>
     </div>
   );
@@ -54,8 +52,9 @@ const VideoBrowser: React.FC<VideoBrowserProps> = ({ videoHistory, roundNumber }
         prompt = video.prompt;
         returnElements.push(<RoundHeader key={`header-${prompt}`} prompt={prompt} videoRoundNumber={videoRoundNumber} />)
       }
-      returnElements.push(<VideoCard key={video.videoURL} video={video} />)
+      returnElements.push(<VideoCard key={video.videoId} video={video} />)
     });
+    returnElements.push(<br></br>);
     return returnElements;
   }
 

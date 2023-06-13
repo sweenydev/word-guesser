@@ -1,12 +1,13 @@
 declare type VideoInfo = {
   prompt: string;
   title: string;
-  videoURL: string;
+  videoId: string;
   channelName: string;
-  channelURL: string;
+  channelId: string;
   description: string;
   releaseDate: string;
   thumbnailURL: string;
+  views: number;
 };
 
 declare type HintCosts = {

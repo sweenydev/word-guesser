@@ -80,8 +80,6 @@ agreement
 agricultural
 ahead
 aid
-aide
-AIDS
 aim
 air
 aircraft
@@ -369,7 +367,6 @@ campaign
 campus
 can
 Canadian
-cancer
 candidate
 cap
 capability
@@ -675,11 +672,9 @@ data
 date
 daughter
 day
-dead
 deal
 dealer
 dear
-death
 debate
 debt
 decade
@@ -793,7 +788,6 @@ divide
 division
 divorce
 DNA
-do
 doctor
 document
 dog
@@ -1311,7 +1305,6 @@ ideal
 identification
 identify
 identity
-ie
 if
 ignore
 ill
@@ -1434,8 +1427,6 @@ jacket
 jail
 Japanese
 jet
-Jew
-Jewish
 job
 join
 joint
@@ -1457,9 +1448,6 @@ keep
 key
 kick
 kid
-kill
-killer
-killing
 kind
 king
 kiss
@@ -1556,7 +1544,6 @@ long
 look
 loose
 lose
-loss
 lost
 lot
 lots
@@ -1653,7 +1640,6 @@ mind
 mine
 minister
 minor
-minority
 minute
 miracle
 mirror
@@ -1677,7 +1663,6 @@ mood
 moon
 moral
 more
-moreover
 morning
 mortgage
 most
@@ -1693,12 +1678,8 @@ mouth
 move
 movement
 movie
-Mr
-Mrs
-Ms
 much
 multiple
-murder
 muscle
 museum
 music
@@ -1711,7 +1692,6 @@ my
 myself
 mystery
 myth
-naked
 name
 narrative
 narrow
@@ -1755,7 +1735,6 @@ noise
 nomination
 none
 nonetheless
-nor
 normal
 normally
 north
@@ -1799,7 +1778,6 @@ office
 officer
 official
 often
-oh
 oil
 ok
 okay
@@ -2383,7 +2361,6 @@ shit
 shock
 shoe
 shoot
-shooting
 shop
 shopping
 shore
@@ -2579,7 +2556,6 @@ sufficient
 sugar
 suggest
 suggestion
-suicide
 suit
 summer
 summit
@@ -2914,15 +2890,11 @@ wheel
 when
 whenever
 where
-whereas
-whether
-which
 while
 whisper
 white
 who
 whole
-whom
 whose
 why
 wide

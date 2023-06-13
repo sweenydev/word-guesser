@@ -3,7 +3,7 @@
 .video-browser {
   background: $secondary-color;
   color: white;
-  font-size: 13px;
+  font-size: 1.35vmin;
   flex-grow: 1;
   overflow-y: auto;
   border-radius: 10px;
@@ -21,21 +21,55 @@
     display: flex;
     justify-content: space-between;
     div {
-      margin: 0 20px;
+      margin: 2px 20px 1px;
     }
   }
   .video-card {
     display: flex;
     align-items: center;
+    padding: 10px;
+    margin: 8px;
+    border-radius: 10px;
+    border: 2px solid $tertiary-color;
     &:last-of-type {
-      padding-bottom: 25%;
-    }
-    a {
-      color: $primary-color;
+      margin-bottom: 15%;
     }
     .thumbnail {
-      margin-right: 16px;
-      width: 240px;
+      max-width: calc(100%/3.5);
+      height: auto;
+      object-fit: cover;
+      margin-right: 10px;
+      border-radius: 5px;
+      transition: transform 0.3s;
+      border: 2px solid $tertiary-color;
+      &:hover {
+        transform: scale(1.25) translateX(10px);
+      }
+    }
+
+    .title {
+      font-size: 1.6vmin;
+      line-height: 1.7vmin;
+    }
+
+    .channel, .release-date, .views {
+      color: #999;
+    }
+
+    .description {
+      color: #666;
+    }
+
+    .channel, .description {
+      margin-bottom: 3px;
+    }
+
+    a {
+      color: $primary-color;
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
 }
