@@ -1,6 +1,5 @@
 import './App.scss';
 import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import Confetti from 'react-confetti';
 import ReactPlayer from 'react-player/youtube';
 import StandardButton from './reusable-components/buttons/standard-button';
@@ -24,8 +23,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-const firebaseFunctions = getFunctions();
-const searchYoutube = httpsCallable(firebaseFunctions, 'searchYoutube');
+const searchYoutube = httpsCallable(getFunctions(), 'searchYoutube');
 
 const mysteryWordsFile = require('./words.txt');
 
@@ -57,7 +55,7 @@ function App() {
   const [currentScore, setCurrentScore] = useState<number>(0);
   const [searchIndex, setSearchIndex] = useState<number>(0);
   const [videosPurchased, setVideosPurchased] = useState<number>(0);
-  const [videoId, setVideoId] = useState<string>('jYS6eEs_Hhs');
+  const [videoId, setVideoId] = useState<string>('1p6ofiJDACk');
   const [videoIsPlaying, setVideoIsPlaying] = useState<boolean>(false);
   const [confettiFalling, setConfettiFalling] = useState<boolean>(false);
   const [gameState, setGameState] = useState<GameState>('menu');
@@ -101,10 +99,12 @@ function App() {
   useEffect(() => {
     if (roundTimeLeft !== undefined) {
       if (roundTimeLeft > 0) {
-        setTimeout(() => {
-          setRoundTimeLeft(prevRoundTimeLeft => (prevRoundTimeLeft || 0) - 100 + timeChange.current);
-          if (timeChange.current !== 0) timeChange.current = 0;
-        }, 100);
+        if(gameState === 'playing') {
+          setTimeout(() => {
+            setRoundTimeLeft(prevRoundTimeLeft => (prevRoundTimeLeft || 0) - 100 + timeChange.current);
+            if (timeChange.current !== 0) timeChange.current = 0;
+          }, 100);
+        }
       } else {
         endGame();
       }
@@ -117,12 +117,13 @@ function App() {
    */
   async function searchVids(): Promise<void> {
     if (searchIndex !== currentSearchedIndex.current) {
-      // Use previously fetched data on searchIndex increment
+      // Use previously fetched data when updating index instead of user/mystery word
       setVideoId(currentSearch.current[searchIndex].videoId); 
       currentSearchedIndex.current = searchIndex;
       console.log('old data used!','\nMYSTERY WORD', mysteryWord, '\nUSER WORD', userWord, '\nSEARCHINDEX', searchIndex);
     } 
     else if (userWord && mysteryWord) {
+      setVideoId('1p6ofiJDACk');
       searchYoutube(`${userWord} ${mysteryWord}`).then(async (searchResults: any) => {
         const newSearchResults: VideoInfo[] = searchResults.data;
         setVideosPurchased(0);
@@ -151,13 +152,14 @@ function App() {
   }
 
   /**
-   * Charges the user for the cost of a hint based on the current game mode.
+   * Charges the user for the cost of a hint based on the current game mode and game state.
    * @param {keyof HintCosts} hintType - The key for the type of hint being used.
    * @returns {void}
    */ 
   function chargeHintCost(hintType: keyof HintCosts): void {
     let hintCost: any = hintCosts[gameMode][hintType];
     if(typeof hintCost === 'function') hintCost = hintCost();
+    if(gameState === 'roundover') hintCost = hintCost * .4;
     switch(gameMode) {
       case 'endurance': 
         changeHintPoints(hintCost);
@@ -172,7 +174,7 @@ function App() {
 
   /**
    * Starts a new game with given game mode and user word.
-   * @param gameMode The chosen game mode. (TODO, add game modes)
+   * @param gameMode The chosen game mode.
    * @param initUserWord The initial user word to use in the game.
    * @returns void if the initUserWord parameter is empty, otherwise returns "incorrect" for inputbutton animation.
    */
@@ -191,6 +193,18 @@ function App() {
       setRoundTimeLeft(roundTimeLimit);
     }
     setVideoIsPlaying(true);
+  }
+
+  function startNextRound(): void {
+    currentSearchedIndex.current = 0;
+    setRoundNumber(roundNumber+1);
+    generateNewMysteryWord(true);
+    setGameState('playing');
+    setVideoIsPlaying(true);
+    if(gameMode === 'speed') {
+      //restart the countdown timer
+      roundTimeLeft && setRoundTimeLeft(roundTimeLeft - 100);
+    }
   }
 
   function endGame(): void {
@@ -264,15 +278,11 @@ function App() {
    */
   function checkAnswer(guessWord: string): void | string {
     if (mysteryWord.toLowerCase() === guessWord.toLowerCase()) {
+      setVideoIsPlaying(false);
+      setGameState('roundover');
       changeConfettiFalling(true);
-      //TODO: Add pre round new word selection menu
-      const newWord = null;//prompt('Correct! Choose Your Next Word (leave blank to use previous word)');
-      currentSearchedIndex.current = 0;
-      changeUserWord(newWord ? newWord : userWord, true);
-      generateNewMysteryWord(true);
       changeHintPoints(Math.floor((100-hintPoints)/4) + 5);
       setCurrentScore(currentScore+1);
-      setRoundNumber(roundNumber+1);
     } else {
       chargeHintCost('incorrectGuess');
       return 'incorrect';
@@ -314,18 +324,24 @@ function App() {
             ]}/>
         } 
         <div className="tv-bezel">
-          {gameState==='gameover' && 
-          <div className="game-over-screen">
-            <div>GAME OVER</div>
-            <div>Final score: {currentScore.toString().padStart(6,'0')}</div>
-            <VideoBrowser
-              videoHistory={videoHistory}
-            />
-          </div>
-          }
           {gameState==='menu' && 
           <div className="menu-screen">
             <div>WORD PLAYER</div>
+          </div>
+          }
+          {gameState==='roundover' && 
+          <div className="menu-screen">
+            <div>Correct!</div>
+            <VideoBrowser
+              videoHistory={videoHistory}
+              roundNumber={roundNumber}/>
+          </div>
+          }
+          {gameState==='gameover' && 
+          <div className="game-over-screen">
+            <div> ━━━ GAME OVER ━━━</div>
+            <div>Final Score: {currentScore.toString().padStart(6,'0')}</div>
+            <VideoBrowser videoHistory={videoHistory}/>
           </div>
           }
         </div>
@@ -342,38 +358,40 @@ function App() {
             position="absolute"/>
         </div>
         {gameState==='playing' &&
-        <>
-          <div className="video-selectors">
-            <StandardButton 
-              classNames={`round ${searchIndex === 0 && 'hidden'}`} 
-              buttonText={`◄`} 
-              clickHandler={()=>{setSearchIndex(searchIndex - 1)}} />
-            <StandardButton 
-              classNames={`round ${searchIndex === videosPurchased && 'hidden'}`} 
-              buttonText={`►`} 
-              clickHandler={()=>{setSearchIndex(searchIndex + 1)}} />
-          </div>
-          <div className="score-board">
-            <div className="hint-points">
-              {gameMode === 'speed' ? 'Time Left:' : 'Hint Points:'}
-              <div className="hp-bar-container">
-                {gameMode==='speed' && roundTimeLeft
-                  ? <HPBar maxHP={roundTimeLimit} currentHP={roundTimeLeft} isTimer={true}/>
-                  : <HPBar maxHP={100} currentHP={hintPoints}/>
-                }
-              </div>
+        <div className="video-selectors">
+          <StandardButton 
+            classNames={`round ${searchIndex === 0 && 'hidden'}`} 
+            buttonText={`◄`} 
+            clickHandler={()=>{setSearchIndex(searchIndex - 1)}} />
+          <StandardButton 
+            classNames={`round ${searchIndex === videosPurchased && 'hidden'}`} 
+            buttonText={`►`} 
+            clickHandler={()=>{setSearchIndex(searchIndex + 1)}} />
+        </div>
+        }
+        {(gameState==='playing' || gameState==='roundover') &&
+        <div className="score-board">
+          <div className="hint-points">
+            {gameMode === 'speed' ? 'Time Left:' : 'Hint Points:'}
+            <div className="hp-bar-container">
+              {gameMode==='speed' && roundTimeLeft
+                ? <HPBar maxHP={roundTimeLimit} currentHP={roundTimeLeft} isTimer={true}/>
+                : <HPBar maxHP={100} currentHP={hintPoints}/>
+              }
             </div>
-            <span className="score">Score: {currentScore.toString().padStart(6,'0')}</span>
           </div>
-          <div className="words-container">
-            <span>Your Word: 
-              <span className='user-word'>{userWord}</span>
-            </span>
-            <span>Mystery Word:
-              <MysteryWord ref={mysteryWordComponentRef} mysteryWord={mysteryWord}/>
-            </span>
-          </div>
-        </>
+          <span className="score">Score: {currentScore.toString().padStart(6,'0')}</span>
+        </div>
+        }
+        {gameState==='playing' &&
+        <div className="words-container">
+          <span>Your Word: 
+            <span className='user-word'>{userWord}</span>
+          </span>
+          <span>Mystery Word:
+            <MysteryWord ref={mysteryWordComponentRef} mysteryWord={mysteryWord}/>
+          </span>
+        </div>
         }
         <div className="hint-container">
           {gameState==='playing' &&
@@ -452,14 +470,25 @@ function App() {
               placeholder={`Enter Your Starting Word Here`}/>
           </div>
           }
-          {gameState==='roundover' && //TODO implement post round screen
-          <div className="start-menu"> 
-            <InputButton
-              classNames={`hint`}
-              buttonText={`Next Word`}
-              clickHandler={changeUserWord} 
-              placeholder={`Enter Your Next Word Here`}/>
-          </div>
+          {gameState==='roundover' &&
+          <div className="grid-container">
+              <InputButton
+                classNames={`hint`}
+                buttonText={`Choose Next Word`}
+                secondaryButtonText={
+                  gameMode==='endurance'
+                    ? `-${-.4*hintCosts[gameMode].changeWord} HP (60% OFF!)`
+                    : `-${formatTime(-.4*hintCosts[gameMode].changeWord)} (60% OFF!)`
+                }
+                clickHandler={(nextWord)=>{changeUserWord(nextWord); startNextRound();}}
+                placeholder={`Enter Your Next Word Here`}/>
+              OR
+              <StandardButton
+                classNames={`hint`}
+                buttonText={`Let it Ride!`}
+                secondaryButtonText={`Keep using the same word for free`}
+                clickHandler={startNextRound} />
+            </div>
           }
         </div>      
       </header>

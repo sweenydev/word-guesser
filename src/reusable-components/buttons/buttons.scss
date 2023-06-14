@@ -7,15 +7,17 @@
   padding: 3px 5px;
   margin: 10px;
   user-select: none;
-  font-size: calc(2.3vmin);
+  font-size: 2.6vmin;
   display: flex;
   flex-direction: column;
   text-align: center;
   white-space: pre-wrap;
+  overflow:visible;
   &.hint {
     background: $primary-color;
     border: 4px solid $primary-color;
     color: white;
+    width: 100%;
     &:hover {
       filter:saturate(300%)
     }
@@ -48,11 +50,13 @@
   }
   .primary-text {
     &.has-secondary {
+      line-height: 2.6vmin;
       align-items: flex-end;
     }
   }
   .secondary-text {
-    font-size: calc(1.5vmin);
+    font-size: 1.6vmin;
+    line-height: 1.6vmin
   }
   transition: all .25s ease-in-out; 
 }

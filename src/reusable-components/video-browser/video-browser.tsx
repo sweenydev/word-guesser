@@ -27,7 +27,7 @@ function VideoCard({ video }: { video: VideoInfo }): JSX.Element {
 function RoundHeader({ prompt, videoRoundNumber }: { prompt: string; videoRoundNumber?: number }): JSX.Element {
   return (
     <div className="section-header">
-      <div className="prompt">Search: {prompt}</div>
+      <div className="search">Search: <span className="prompt">{prompt}</span></div>
       {videoRoundNumber!==undefined &&
       <div className="round-number">
         Round {videoRoundNumber + 1}
@@ -57,7 +57,6 @@ const VideoBrowser: React.FC<VideoBrowserProps> = ({ videoHistory, roundNumber }
     returnElements.push(<br></br>);
     return returnElements;
   }
-
   const videoCards = roundNumber !== undefined
     ? generateRoundVideoCards(videoHistory[roundNumber])
     : videoHistory.flatMap((roundVideos, roundNumber) => generateRoundVideoCards(roundVideos, roundNumber));
