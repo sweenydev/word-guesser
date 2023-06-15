@@ -19,8 +19,8 @@ interface InputButtonProps {
  * @param {string} [placeholder] - (Optional) placeholder to be displayed inside the input field.
  */
 const InputButton: React.FC<InputButtonProps> = ({ buttonText, secondaryButtonText, clickHandler, classNames, placeholder }) => {
-  const [input, setInput] = useState('');
-  const [runIncorrectAnimation, setRunIncorrectAnimation] = useState<boolean>(false);
+  const [input, setInput] = useState<string>('');
+  const [incorrectAnimationPlaying, setIncorrectAnimationPlaying] = useState<boolean>(false);
   
   function onInputChange(e: any): void {
     setInput(e.target.value);
@@ -29,8 +29,20 @@ const InputButton: React.FC<InputButtonProps> = ({ buttonText, secondaryButtonTe
   function onClick(): void {
     const result = clickHandler(input);
     if(result === 'incorrect') {
-      setRunIncorrectAnimation(true);
-      setTimeout(()=>{setRunIncorrectAnimation(false)},500);
+      setIncorrectAnimationPlaying(true);
+      setTimeout(()=>{
+        setIncorrectAnimationPlaying(false);
+        setInput('');
+      },500);
+    } else {
+      setInput('');
+    }
+    
+  }
+
+  function handleKeyDown(e: any): void {
+    if (e.key === 'Enter') {
+      onClick();
     }
   }
 
@@ -38,10 +50,11 @@ const InputButton: React.FC<InputButtonProps> = ({ buttonText, secondaryButtonTe
     <div style={{display:`inline-flex`, width:`100%`}}>
       <StandardButton classNames={`input ${classNames}`} buttonText={buttonText} secondaryButtonText={secondaryButtonText} clickHandler={onClick} />
       <input
-        className={`button-input-text ${classNames} ${runIncorrectAnimation ? 'incorrect' : ''}`}
+        className={`button-input-text ${classNames} ${incorrectAnimationPlaying ? 'incorrect' : ''}`}
         type="text"
         placeholder={placeholder}
         onChange={(event) => {onInputChange(event)}}
+        onKeyDown={handleKeyDown}
         value={input} />
     </div>
   )

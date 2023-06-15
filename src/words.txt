@@ -760,7 +760,6 @@ dirty
 disability
 disagree
 disappear
-disaster
 discipline
 discourse
 discover
@@ -2331,8 +2330,6 @@ settlement
 seven
 several
 severe
-sex
-sexual
 shade
 shadow
 shake
@@ -2597,7 +2594,6 @@ target
 task
 taste
 tax
-taxpayer
 tea
 teach
 teacher

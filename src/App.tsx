@@ -308,9 +308,9 @@ function App() {
           <Confetti
             className="confetti"
             numberOfPieces={10000}
-            opacity={0.9}
+            opacity={1}
             gravity={0.095}
-            initialVelocityY={80}
+            initialVelocityY={70}
             tweenDuration={15000}
             recycle={false}
             colors={[ //REFERENCE: $rainbow-colors in variables.scss
