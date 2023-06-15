@@ -3,7 +3,7 @@
 .video-browser {
   background: $secondary-color;
   color: white;
-  font-size: 1.35vmin;
+  font-size: 1.5vmin;
   flex-grow: 1;
   overflow-y: auto;
   border-radius: 10px;
@@ -14,7 +14,7 @@
     display: none;
   }
   .section-header {
-    font-size: 20px;
+    font-size: 2.3vmin;
     position: sticky;
     border-radius: 5px 5px 0 0;
     top: 0;
@@ -51,8 +51,7 @@
     }
 
     .title {
-      font-size: 1.65vmin;
-      line-height: 1.7vmin;
+      font-size: 1.7vmin;
     }
 
     .channel, .release-date, .views {

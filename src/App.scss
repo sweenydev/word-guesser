@@ -76,7 +76,7 @@ $screen-height: calc($screen-width * .5625);
 .tv-screen {
   height: calc($screen-height + 12vh);
   width: $screen-width;
-  max-width: calc(95vw - 16vh);
+  max-width: calc(95vw - 14vh);
   position: absolute;
   top: calc($screen-top - 1px);
   border-left: 1px solid black;
