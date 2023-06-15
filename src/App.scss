@@ -33,9 +33,9 @@ body {
 }
 
 /** VIDEOPLAYER **/
-$screen-top: 1.5vh;
-$screen-width: 73vh;
-$screen-height: 44vh;
+$screen-top: 1vh;
+$screen-width: 92vh;
+$screen-height: calc($screen-width * .5625);
 
 .tv-bezel {
   position: absolute;
@@ -49,7 +49,7 @@ $screen-height: 44vh;
   border-radius: 50px;
   //This margin-bottom is applied to hide the title of the video
   margin-bottom: -50px;
-  box-shadow: 0 0 0 6px $tertiary-color;
+  box-shadow: 0 0 0 5px $tertiary-color;
   z-index: 2;
   .game-over-screen {
     width: 100%;
@@ -74,11 +74,11 @@ $screen-height: 44vh;
 }
 
 .tv-screen {
-  height: calc($screen-height + 6vh);
+  height: calc($screen-height + 12vh);
   width: $screen-width;
   max-width: calc(95vw - 16vh);
   position: absolute;
-  top: $screen-top;
+  top: calc($screen-top - 1px);
   border-left: 1px solid black;
 }
 .video-selectors {
@@ -149,7 +149,7 @@ $screen-height: 44vh;
 .hint-container {
   position: absolute;
   bottom: .5vh;
-  height: 36vh;
+  height: 29.5vh;
   padding: 15px 20px;
   margin: 0 20px;
   border: 4px solid $tertiary-color;
@@ -158,11 +158,11 @@ $screen-height: 44vh;
   min-width: 75%;
   max-width: 100%;
   .grid-container {
+    margin-top: -5px;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    height: 100%;
     .grid-item {
       flex-basis: 50%;
       .button {
@@ -179,6 +179,10 @@ $screen-height: 44vh;
     align-items: center;
     justify-content: center;
     flex-direction: column;
+  }
+  .round-over {
+    height: 100%;
+    margin-top: 2px;
   }
 }
 

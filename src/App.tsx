@@ -308,10 +308,10 @@ function App() {
           <Confetti
             className="confetti"
             numberOfPieces={10000}
-            opacity={0.8}
-            gravity={0.05}
-            initialVelocityY={120}
-            tweenDuration={10000}
+            opacity={0.9}
+            gravity={0.095}
+            initialVelocityY={80}
+            tweenDuration={15000}
             recycle={false}
             colors={[ //REFERENCE: $rainbow-colors in variables.scss
               `rgb(252, 65, 65)`,
@@ -471,24 +471,24 @@ function App() {
           </div>
           }
           {gameState==='roundover' &&
-          <div className="grid-container">
-              <InputButton
-                classNames={`hint`}
-                buttonText={`Choose Next Word`}
-                secondaryButtonText={
-                  gameMode==='endurance'
-                    ? `-${-.4*hintCosts[gameMode].changeWord} HP (60% OFF!)`
-                    : `-${formatTime(-.4*hintCosts[gameMode].changeWord)} (60% OFF!)`
-                }
-                clickHandler={(nextWord)=>{changeUserWord(nextWord); startNextRound();}}
-                placeholder={`Enter Your Next Word Here`}/>
-              OR
-              <StandardButton
-                classNames={`hint`}
-                buttonText={`Let it Ride!`}
-                secondaryButtonText={`Keep using the same word for free`}
-                clickHandler={startNextRound} />
-            </div>
+          <div className="grid-container round-over">
+            <InputButton
+              classNames={`hint`}
+              buttonText={`Choose Next Word`}
+              secondaryButtonText={
+                gameMode==='endurance'
+                  ? `-${-.4*hintCosts[gameMode].changeWord} HP (60% OFF!)`
+                  : `-${formatTime(-.4*hintCosts[gameMode].changeWord)} (60% OFF!)`
+              }
+              clickHandler={(nextWord)=>{changeUserWord(nextWord); startNextRound();}}
+              placeholder={`Enter Your Next Word Here`}/>
+            OR
+            <StandardButton
+              classNames={`hint`}
+              buttonText={`Let it Ride!`}
+              secondaryButtonText={`Keep using the same word for free`}
+              clickHandler={startNextRound} />
+          </div>
           }
         </div>      
       </header>

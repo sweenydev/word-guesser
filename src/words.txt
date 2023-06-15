@@ -1048,7 +1048,6 @@ financial
 find
 finding
 fine
-finger
 finish
 fire
 firm
@@ -1076,9 +1075,7 @@ folk
 follow
 following
 food
-foot
 football
-for
 force
 foreign
 forest
@@ -1110,7 +1107,6 @@ fresh
 friend
 friendly
 friendship
-from
 front
 fruit
 frustration
@@ -1204,7 +1200,6 @@ guest
 guide
 guideline
 guilty
-gun
 guy
 habit
 habitat
@@ -1451,7 +1446,6 @@ king
 kiss
 kitchen
 knee
-knife
 knock
 know
 knowledge
@@ -2358,13 +2352,11 @@ shirt
 shit
 shock
 shoe
-shoot
 shop
 shopping
 shore
 short
 shortly
-shot
 should
 shoulder
 shout
@@ -2848,7 +2840,6 @@ way
 weak
 wealth
 wealthy
-weapon
 wear
 weather
 wedding
@@ -2897,7 +2888,6 @@ wire
 wisdom
 wise
 wish
-with
 withdraw
 within
 without
@@ -2917,7 +2907,6 @@ world
 worried
 worry
 worth
-would
 wound
 wrap
 write
