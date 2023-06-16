@@ -242,11 +242,15 @@ function App() {
    * @param isFree if true, changes the user's word without a cost to hint points.
    * @returns void.
    */
-  function changeUserWord(newWord: string, isFree?: boolean): void {
+  function changeUserWord(newWord: string, isFree?: boolean): void | string {
+    if (!newWord || (newWord.toLowerCase() === userWord.toLowerCase())) {
+      return 'incorrect';
+    }
     currentSearchedIndex.current = 0;
     setUserWord(newWord);
     setSearchIndex(0);
     if (!isFree) chargeHintCost('changeWord');
+    if (gameState==='roundover') startNextRound();
   }
   
   /**
@@ -407,7 +411,7 @@ function App() {
                       : `FREE`
                   }
                   clickHandler={checkAnswer} 
-                  placeholder={`Enter Your Guess Here`}/>
+                  placeholder={`${mysteryWord.length} Letter Mystery Word`}/>
               </div>
               <div className="grid-item">
                 <InputButton 
@@ -419,7 +423,7 @@ function App() {
                       : `-${formatTime(-1*hintCosts[gameMode].changeWord)}`
                   }
                   clickHandler={changeUserWord}
-                  placeholder={`Enter Your Word Here`}/>
+                  placeholder={`Your New Word`}/>
               </div>
               <div className="grid-item">
                 <StandardButton 
@@ -480,8 +484,8 @@ function App() {
                   ? `-${-.4*hintCosts[gameMode].changeWord} HP (60% OFF!)`
                   : `-${formatTime(-.4*hintCosts[gameMode].changeWord)} (60% OFF!)`
               }
-              clickHandler={(nextWord)=>{changeUserWord(nextWord); startNextRound();}}
-              placeholder={`Enter Your Next Word Here`}/>
+              clickHandler={(nextWord)=>{return changeUserWord(nextWord);}}
+              placeholder={`Your New Word (Current Word: ${userWord})`}/>
             OR
             <StandardButton
               classNames={`hint`}
