@@ -10,7 +10,7 @@ function VideoCard({ video }: { video: VideoInfo }): JSX.Element {
     <div className="video-card">
       <img className="thumbnail" src={video.thumbnailURL} alt={video.title} />
       <div>
-        <div className="title">
+        <div className="video-title">
           <a href={`https://www.youtube.com/watch?v=${video.videoId}`} target="_blank">{video.title}</a>
         </div>
         <div className="channel">

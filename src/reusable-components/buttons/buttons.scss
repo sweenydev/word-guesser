@@ -20,7 +20,8 @@ $button-height: 6.5vh;
     color: white;
     width: 100%;
     &:hover {
-      filter:saturate(300%)
+      border-color: nth($rainbow-colors, 1);
+      background: nth($rainbow-colors, 1);
     }
   }
   &.input {
@@ -37,6 +38,15 @@ $button-height: 6.5vh;
     transition: all .1s ease-in-out;
     &:hover {
       background: $tertiary-color;
+    }
+  }
+  &.light {
+    background-color: white;
+    border: none;
+    color: $primary-color;
+    &:hover{
+      background-color: $primary-color;
+      color: white;
     }
   }
   &:hover {
@@ -71,6 +81,7 @@ $button-height: 6.5vh;
   border: 4px solid $primary-color;
   padding: 0px 5px 6px 8px;
   flex-basis: 50%;
+  transition: all .25s ease-in-out;
   &::placeholder {
     color: $tertiary-color;
     font-size: calc(1.8vmin);
@@ -81,6 +92,14 @@ $button-height: 6.5vh;
   &.incorrect {
     animation: incorrect 0.5s ease-in-out;
   }
+  &.disabled {
+    pointer-events: none;
+  }
+}
+
+.disabled {
+  cursor: not-allowed !important;
+  filter: saturate(0) !important;
 }
 
 @keyframes incorrect {

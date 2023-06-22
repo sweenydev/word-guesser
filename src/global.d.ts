@@ -12,11 +12,12 @@ declare type VideoInfo = {
 
 declare type HintCosts = {
   [key: string]: number | (() => number);
+  correctGuess: () => number;
   incorrectGuess: number;
   changeWord: number;
   nextVideo: number;
   revealLetter: () => number;
-  newMysteryWord: number;
+  newMysteryWord: () => number;
 }
 
 declare type GameState = 'menu' | 'playing' | 'gameover' | 'roundover';

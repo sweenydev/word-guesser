@@ -69,6 +69,15 @@ $screen-height: calc($screen-width * .5625);
     align-items: center;
     display: flex;
     flex-direction: column;
+    .title {
+      font-size: 9vh;
+      text-align: center;
+      .button {
+        font-size: 6vh;
+        height: 8vh;
+        align-self: center;
+      }
+    }
   }
 }
 
@@ -153,7 +162,7 @@ $screen-height: calc($screen-width * .5625);
   padding: 20px 20px;
   margin: 0 20px;
   border-radius: 20px;
-  background-color: rgba($secondary-color, 0.955);
+  background-color: rgba($secondary-color, 0.94);
   min-width: 75%;
   max-width: 100%;
   .grid-container {
@@ -185,7 +194,36 @@ $screen-height: calc($screen-width * .5625);
   }
 }
 
-//Creates the illusion of independently rising bubbles
+.dancing-letters {
+  span{
+    margin-left: 7px;
+    display: inline-block;
+    animation: dance 2s ease-in infinite;
+    &:nth-child(2n) {
+      animation: dance 2s ease-in-out infinite;
+      //animation-direction: reverse;
+    }
+  }
+}
+
+@keyframes dance {
+  0% {
+    transform: rotate(0deg) skew(0deg) scale(1) translate(0, 0);
+  }
+  25% {
+    transform: rotate(12deg) skew(7.5deg) scale(0.9, 1.2) translate(.5vh, -.95vh);
+  }
+  46%, 50% {
+    transform: rotate(0deg) skew(0deg) scale(1) translate(0, 0);
+  }
+  75% {
+    transform: rotate(-12deg) skew(-7.5deg) scale(0.9, 1.2) translate(-.5vh, -.95vh);
+  }
+  96% {
+    transform: rotate(0deg) skew(0deg) scale(1) translate(0, 0);
+  }
+}
+
 @keyframes bubbles-illusion {
   0%{
     background-position: 0px 0px;

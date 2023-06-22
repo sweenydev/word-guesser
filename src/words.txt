@@ -182,10 +182,8 @@ assistance
 assistant
 associate
 association
-assume
 assumption
 assure
-at
 athlete
 athletic
 atmosphere
@@ -237,7 +235,6 @@ basketball
 bathroom
 battery
 battle
-be
 beach
 bean
 bear
@@ -918,7 +915,6 @@ establish
 establishment
 estate
 estimate
-etc
 ethics
 ethnic
 European
@@ -1216,7 +1212,6 @@ hardly
 hat
 hate
 have
-he
 head
 headline
 headquarters
@@ -1299,7 +1294,6 @@ ideal
 identification
 identify
 identity
-if
 ignore
 ill
 illegal
