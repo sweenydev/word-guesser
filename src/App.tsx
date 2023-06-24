@@ -45,7 +45,6 @@ const mysteryWordsFile = require('./words.txt');
 function App() {
   const wordsList = useRef<Array<string>>([]);
   const currentSearch = useRef<Array<any>>([]);
-  const currentSearchedIndex = useRef<number>(0);
   const mysteryWordComponentRef = useRef<any>(null);
   const timeChange = useRef<number>(0);
 
@@ -65,25 +64,6 @@ function App() {
   const [roundTimeLeft, setRoundTimeLeft] = useState<number>();
   const [videoHistory, setVideoHistory] = useState<Array<Array<VideoInfo>>>([]);
 
-  const hintCosts: { [key in GameMode]: HintCosts }= { 
-    endurance: {
-      correctGuess: () => Math.floor((100-hintPoints)/4) + 5,
-      incorrectGuess: -2,
-      changeWord: -10,
-      nextVideo: -3,
-      revealLetter: () => -1 * Math.floor(100 / mysteryWord.length),
-      newMysteryWord: () => Math.min(-1 * Math.floor(hintPoints / 2), -1),
-    },
-    speed: {
-      correctGuess: () => 1000 * (Math.floor((100-hintPoints)/4) + 5000),
-      incorrectGuess: 0,
-      changeWord: -5000,
-      nextVideo: 0,
-      revealLetter: () => -1000 * Math.floor((roundTimeLeft || 0) / mysteryWord.length / 500) - 5000,
-      newMysteryWord: () => -1000 * Math.floor((roundTimeLeft || 0) / 2 / 1000) ,
-    },
-  };
-
   const roundTimeLimit: number = 120000;
 
   /** Prepare words list. This code will only run when component mounts */
@@ -93,10 +73,39 @@ function App() {
     });
   }, []);
 
-  /** Run searchVids everytime there is a change to userWord, mysteryWord, or searchIndex, to generate and select new videos */
+  /** Run searchVids everytime there is a change to userWord or mysteryWord to generate and select new videos */
   useEffect(() => {
-    searchVids();
-  }, [userWord, mysteryWord, searchIndex]);
+    const searchVids = async() => {
+      currentSearch.current = [];
+      setSearchIndex(0);
+      setVideoId('1p6ofiJDACk');
+      searchYoutube(`${userWord} ${mysteryWord}`).then(async (searchResults: any) => {
+        const newSearchResults: VideoInfo[] = searchResults.data;
+        newSearchResults.sort((a, b) => { // Move videos with the words in the title to the top of the results, both words -> mystery word -> user word
+          const assignPriority = (title: string): number => {
+            let hasMystery: boolean = title.includes(mysteryWord.toLowerCase());
+            let hasUser: boolean = title.includes(userWord.toLowerCase());
+            return (hasMystery && hasUser) ? 3 :
+              (hasMystery) ? 2 :
+              (hasUser) ? 1 : 0;
+          }
+          return assignPriority(b.title.toLowerCase()) - assignPriority(a.title.toLowerCase());
+        });
+        setVideosPurchased(0);
+        setVideoId(newSearchResults[searchIndex].videoId);
+        addToVideoHistory(newSearchResults[searchIndex]);
+        currentSearch.current = newSearchResults;
+        console.log('MYSTERY WORD:', mysteryWord, '\nUSER WORD:', userWord, '\nSEARCHINDEX:', searchIndex);
+      })
+      .catch((err: any) => console.log('Search error:', err));
+    };
+    if (userWord && mysteryWord) searchVids();
+  }, [userWord, mysteryWord]);
+
+  // Change video with previously fetched data when updating index
+  useEffect(() => {
+    if (currentSearch.current.length > 0) setVideoId(currentSearch.current[searchIndex].videoId); 
+  }, [searchIndex]);
   
   /** Counting and gameover logic for countdown timer, updates every 100 ms when roundTimeLeft is defined */
   useEffect(() => {
@@ -115,43 +124,6 @@ function App() {
   }, [roundTimeLeft]);
 
   /**
-   * Searches Youtube for a video based on userWord and mysteryWord or uses previously fetched data.
-   * @returns A Promise that resolves with void when the function completes.
-   */
-  async function searchVids(): Promise<void> {
-    if (searchIndex !== currentSearchedIndex.current) {
-      // Use previously fetched data when updating index instead of user/mystery word
-      setVideoId(currentSearch.current[searchIndex].videoId); 
-      currentSearchedIndex.current = searchIndex;
-      console.log('old data used!','\nMYSTERY WORD', mysteryWord, '\nUSER WORD', userWord, '\nSEARCHINDEX', searchIndex);
-    } 
-    else if (userWord && mysteryWord) {
-      setVideoId('1p6ofiJDACk');
-      searchYoutube(`${userWord} ${mysteryWord}`).then(async (searchResults: any) => {
-        const newSearchResults: VideoInfo[] = searchResults.data;
-        // Move videos with the words in the title to the top of the results, both words -> mystery word -> user word
-        newSearchResults.sort((a, b) => {
-          const assignPriority = (title: string): number => {
-            let hasMystery: boolean = title.includes(mysteryWord.toLowerCase());
-            let hasUser: boolean = title.includes(userWord.toLowerCase());
-            return (hasMystery && hasUser) ? 3 :
-              (hasMystery) ? 2 :
-              (hasUser) ? 1 : 0;
-          }
-          return assignPriority(b.title.toLowerCase()) - assignPriority(a.title.toLowerCase());
-        });
-        setVideosPurchased(0);
-        setVideoId(newSearchResults[searchIndex].videoId);
-        addToVideoHistory(newSearchResults[searchIndex]);
-        currentSearch.current = newSearchResults;
-        currentSearchedIndex.current = searchIndex;
-        console.log('MYSTERY WORD:', mysteryWord, '\nUSER WORD:', userWord, '\nSEARCHINDEX:', searchIndex);
-      })
-      .catch((err: any) => console.log(err));
-    }
-  }
-
-  /**
    * Adds a new VideoInfo object to the video history array for the current round.
    * @param {any} newVideoInfo - The youtube search result to add to the video history.
    * @returns {void}
@@ -167,14 +139,14 @@ function App() {
     let newVideoHistory: VideoInfo[][] = [...videoHistory];
     newVideoHistory[newVideoHistory.length - 1].splice(-1);
     setVideoHistory(newVideoHistory);
-    currentSearch.current.splice(currentSearchedIndex.current, 1);
-    if(currentSearch.current.length <= currentSearchedIndex.current) {
+    currentSearch.current.splice(searchIndex, 1);
+    if(currentSearch.current.length <= searchIndex) {
       // return to previous video if end of search results
-      currentSearchedIndex.current--;
+      setSearchIndex(searchIndex - 1);
     } else {
-      addToVideoHistory(currentSearch.current[currentSearchedIndex.current]);
+      addToVideoHistory(currentSearch.current[searchIndex]);
     }
-    setVideoId(currentSearch.current[currentSearchedIndex.current].videoId);
+    setVideoId(currentSearch.current[searchIndex].videoId);
     console.log('error occurred on vid!', error);
   }
 
@@ -202,7 +174,6 @@ function App() {
   }
 
   function startNextRound(): void {
-    currentSearchedIndex.current = 0;
     setRoundNumber(roundNumber+1);
     generateNewMysteryWord(true);
     setGameState('playing');
@@ -237,8 +208,7 @@ function App() {
    * @returns {void}
    */ 
     function chargeHintCost(hintType: keyof HintCosts): void {
-      let hintCost: any = hintCosts[gameMode][hintType];
-      if(typeof hintCost === 'function') hintCost = hintCost();
+      let hintCost: number = getHintCost(hintType);
       switch(gameMode) {
         case 'endurance': 
           changeHintPoints(hintCost);
@@ -251,6 +221,42 @@ function App() {
       }
     }
 
+    function canAffordHint(hintType: keyof HintCosts): boolean {
+      let budget: number = roundTimeLeft ? roundTimeLeft : hintPoints;
+      return budget > -1 * getHintCost(hintType);
+    }
+
+    function getHintCost(hintType: keyof HintCosts, formatCost?: boolean): any {
+      const hintCosts: { [key in GameMode]: HintCosts } = { 
+        endurance: {
+          correctGuess: () => hintPoints === 100 ? 0 : Math.floor((100-hintPoints)/4) + 2,
+          incorrectGuess: -2,
+          changeWord: -10,
+          nextVideo: -3,
+          revealLetter: () => -1 * Math.floor(100 / mysteryWord.length),
+          newMysteryWord: () => Math.min(-1 * Math.floor(hintPoints / 2), -1),
+        },
+        speed: {
+          correctGuess: () => 60000,
+          incorrectGuess: 0,
+          changeWord: -5000,
+          nextVideo: 0,
+          revealLetter: () => -1000 * Math.floor((roundTimeLeft || 0) / mysteryWord.length / 1000) - 5000,
+          newMysteryWord: () => -1000 * Math.floor((roundTimeLeft || 0) / 2 / 1000) ,
+        },
+      };
+
+      let hintCost: any = hintCosts[gameMode][hintType];
+      if (typeof hintCost === 'function') hintCost = hintCost();
+      if (formatCost) {
+        if (hintCost === 0 ) return 'FREE';
+        let formattedCost: string = '';
+        formattedCost = formattedCost.concat(hintCost > 0 ? '+' : '-');
+        formattedCost = formattedCost.concat(gameMode === 'endurance' ? `${Math.abs(hintCost)} HP` : `${formatTime(Math.abs(hintCost))}`);
+        return formattedCost;
+      } 
+      return hintCost;
+    }
   /**
    * Checks if guessWord matches the mystery word. If guessWord matches, starts a new round and rewards hint points, if incorrect it charges hintpoints.
    * @param guessWord The word the user guessed.
@@ -277,7 +283,6 @@ function App() {
    */
   function generateNewMysteryWord(isFree?:boolean): void {
     setMysteryWord(wordsList.current[Math.floor(Math.random() * wordsList.current.length) + 1]);
-    setSearchIndex(0);
     setGuessedWords([]);
     if (!isFree) chargeHintCost('newMysteryWord');
   }
@@ -302,9 +307,7 @@ function App() {
     if (!newWord || (newWord.toLowerCase() === userWord.toLowerCase())) {
       return 'incorrect';
     }
-    currentSearchedIndex.current = 0;
     setUserWord(newWord);
-    setSearchIndex(0);
     if (!isFree) chargeHintCost('changeWord');
     if (gameState==='roundover') startNextRound();
   }
@@ -460,41 +463,42 @@ function App() {
                 <InputButton 
                   classNames={`hint`} 
                   buttonText={`Guess Mystery Word`}
-                  secondaryButtonText={gameMode==='endurance' ? `${hintCosts[gameMode].incorrectGuess} HP or +${hintCosts[gameMode].correctGuess()} HP` : `FREE`}
+                  secondaryButtonText={`${getHintCost('incorrectGuess', true)} or ${getHintCost('correctGuess', true)}`}
                   clickHandler={checkAnswer} 
                   validationFunction={validateGuessMysteryWord}
                   placeholder={`${mysteryWord.length} Letter Mystery Word`}/>
               </div>
               <div className="grid-item">
                 <InputButton 
-                  classNames={`hint ${hintPoints <= -1*hintCosts[gameMode].changeWord && 'disabled'}`} 
+                  classNames={`hint ${!canAffordHint('changeWord') && 'disabled'}`} 
                   buttonText={`Change Your Word`} 
-                  secondaryButtonText={gameMode==='endurance' ? `-${-1*hintCosts[gameMode].changeWord} HP` : `-${formatTime(-1*hintCosts[gameMode].changeWord)}`}
+                  secondaryButtonText={getHintCost('changeWord', true)}
                   clickHandler={changeUserWord}
                   validationFunction={validateChangeUserWord}
                   placeholder={`Your New Word`}/>
               </div>
               <div className="grid-item">
                 <StandardButton 
-                  classNames={`hint ${(videosPurchased >= currentSearch.current.length-1 || hintPoints <= -1*hintCosts[gameMode].nextVideo) && 'disabled'}`} 
+                  classNames={`hint ${(videosPurchased >= currentSearch.current.length - 1 || !canAffordHint('nextVideo')) && 'disabled'}`} 
                   buttonText={`Buy Next Video`} 
                   secondaryButtonText={
-                    videosPurchased >= currentSearch.current.length - 1 ? 'All videos purchased!' :
-                      gameMode==='endurance' ? `-${-1*hintCosts[gameMode].nextVideo} HP` : `FREE`
+                    videosPurchased >= currentSearch.current.length - 1 && currentSearch.current.length > 0 
+                      ? 'All videos purchased!' 
+                      : getHintCost('nextVideo', true)
                   }
                   clickHandler={buyNextVideo} />
               </div>
               <div className="grid-item">
                 <StandardButton 
-                  classNames={`hint ${hintPoints <= -1*hintCosts[gameMode].revealLetter() && 'disabled'}`} 
+                  classNames={`hint ${!canAffordHint('revealLetter') && 'disabled'}`} 
                   buttonText={`Reveal Random Letter`} 
-                  secondaryButtonText={gameMode==='endurance' ? `-${-1*hintCosts[gameMode].revealLetter()} HP` : `-${formatTime(-1*hintCosts[gameMode].revealLetter())}`}
+                  secondaryButtonText={getHintCost('revealLetter', true)}
                   clickHandler={revealLetter} />
               </div>
                 <StandardButton 
-                  classNames={`hint ${hintPoints <= -1*hintCosts[gameMode].newMysteryWord() && 'disabled'}`} 
+                  classNames={`hint ${!canAffordHint('newMysteryWord') && 'disabled'}`} 
                   buttonText={`New Mystery Word`} 
-                  secondaryButtonText={gameMode==='endurance' ? `-${-1*hintCosts[gameMode].newMysteryWord()} HP` : `-${formatTime(-1*hintCosts[gameMode].newMysteryWord())}`}
+                  secondaryButtonText={getHintCost('newMysteryWord', true)}
                   clickHandler={()=>{generateNewMysteryWord(false)}} />
             </div>
             
