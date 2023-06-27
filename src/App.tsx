@@ -202,17 +202,6 @@ function App() {
   }
 
   /**
-   * Changes hint points by adding the pointChange value.
-   * @param pointChange The amount of points to add/remove from hintPoints.
-   * @returns void.
-   */
-  function changeHintPoints(pointChange: number): void {
-    const newHintPoints = Math.max(0, Math.min(hintPoints + pointChange, maxHP));
-    setHintPoints(newHintPoints);
-    if (newHintPoints === 0) endGame();
-  }
-
-  /**
    * Charges the user for the cost of a hint based on the current game mode and game state.
    * @param {keyof HintCosts} hintType - The key for the type of hint being used.
    * @returns {void}
@@ -221,7 +210,9 @@ function App() {
       let hintCost: number = getHintCost(hintType);
       switch(gameMode) {
         case 'endurance': 
-          changeHintPoints(hintCost);
+          const newHintPoints: number = Math.max(0, Math.min(hintPoints + hintCost, maxHP));
+          setHintPoints(newHintPoints);
+          if (newHintPoints === 0) endGame();
           break;
         case 'speed':
           timeChange.current += hintCost;
