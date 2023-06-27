@@ -206,67 +206,67 @@ function App() {
    * @param {keyof HintCosts} hintType - The key for the type of hint being used.
    * @returns {void}
    */ 
-    function chargeHintCost(hintType: keyof HintCosts): void {
-      let hintCost: number = getHintCost(hintType);
-      switch(gameMode) {
-        case 'endurance': 
-          const newHintPoints: number = Math.max(0, Math.min(hintPoints + hintCost, maxHP));
-          setHintPoints(newHintPoints);
-          if (newHintPoints === 0) endGame();
-          break;
-        case 'speed':
-          timeChange.current += hintCost;
-          break;
-        default:
-          console.log(`Add a chargeHintCost case for ${gameMode}!`)
-      }
-    } 
-
-    /**
-     * Check if the current hint can be bought with remaining time or hint points
-     * @param hintType 
-     * @returns boolean - true if the hint can be afforded
-     */
-    function canAffordHint(hintType: keyof HintCosts): boolean {
-      return (roundTimeLeft ? roundTimeLeft : hintPoints) > -1 * getHintCost(hintType);
+  function chargeHintCost(hintType: keyof HintCosts): void {
+    let hintCost: number = getHintCost(hintType);
+    switch(gameMode) {
+      case 'endurance': 
+        const newHintPoints: number = Math.max(0, Math.min(hintPoints + hintCost, maxHP));
+        setHintPoints(newHintPoints);
+        if (newHintPoints === 0) endGame();
+        break;
+      case 'speed':
+        timeChange.current += hintCost;
+        break;
+      default:
+        console.log(`Add a chargeHintCost case for ${gameMode}!`)
     }
+  } 
 
   /**
-    * Returns the cost of using a hint in the game, optionally formatted as a string.
-    * @param hintType - The type of hint to use, such as ‘correctGuess’, ‘changeWord’, etc.
-    * @param formatCost - Whether to format the cost as a string or not. If true, the cost will be prefixed with ‘+’ or ‘-’ and suffixed with ‘HP’ or time units depending on the game mode. If false, the cost will be a number.
-    * @returns The cost of using the hint, either as a number or a string. 
-    */ 
-    function getHintCost(hintType: keyof HintCosts, formatCost?: boolean): any {
-      const hintCosts: { [key in GameMode]: HintCosts } = { 
-        endurance: {
-          correctGuess: () => hintPoints === maxHP ? 0 : Math.floor((maxHP-hintPoints)/4) + 2,
-          incorrectGuess: -2,
-          changeWord: -10,
-          nextVideo: -3,
-          revealLetter: () => -1 * Math.floor(maxHP / mysteryWord.length),
-          newMysteryWord: () => Math.min(-1 * Math.floor(hintPoints / 2), -1),
-        },
-        speed: {
-          correctGuess: () => 60000,
-          incorrectGuess: 0,
-          changeWord: -5000,
-          nextVideo: 0,
-          revealLetter: () => -1000 * Math.floor((roundTimeLeft || 0) / mysteryWord.length / 1000) - 5000,
-          newMysteryWord: () => -1000 * Math.floor((roundTimeLeft || 0) / 2 / 1000) ,
-        },
-      };
-      let hintCost: any = hintCosts[gameMode][hintType];
-      if (typeof hintCost === 'function') hintCost = hintCost();
-      if (formatCost) {
-        if (hintCost === 0) return 'FREE';
-        let formattedCost: string = '';
-        formattedCost = formattedCost.concat(hintCost > 0 ? '+' : '-');
-        formattedCost = formattedCost.concat(gameMode === 'endurance' ? `${Math.abs(hintCost)} HP` : `${formatTime(Math.abs(hintCost))}`);
-        return formattedCost;
-      } 
-      return hintCost;
-    }
+   * Check if the current hint can be bought with remaining time or hint points
+   * @param hintType 
+   * @returns boolean - true if the hint can be afforded
+   */
+  function canAffordHint(hintType: keyof HintCosts): boolean {
+    return (roundTimeLeft ? roundTimeLeft : hintPoints) > -1 * getHintCost(hintType);
+  }
+
+  /**
+   * Returns the cost of using a hint in the game, optionally formatted as a string.
+   * @param hintType - The type of hint to use, such as ‘correctGuess’, ‘changeWord’, etc.
+   * @param formatCost - Whether to format the cost as a string or not. If true, the cost will be prefixed with ‘+’ or ‘-’ and suffixed with ‘HP’ or time units depending on the game mode. If false, the cost will be a number.
+   * @returns The cost of using the hint, either as a number or a string. 
+   */ 
+  function getHintCost(hintType: keyof HintCosts, formatCost?: boolean): any {
+    const hintCosts: { [key in GameMode]: HintCosts } = { 
+      endurance: {
+        correctGuess: () => hintPoints === maxHP ? 0 : Math.floor((maxHP-hintPoints)/4) + 2,
+        incorrectGuess: -2,
+        changeWord: -10,
+        nextVideo: -3,
+        revealLetter: () => -1 * Math.floor(maxHP / mysteryWord.length),
+        newMysteryWord: () => Math.min(-1 * Math.floor(hintPoints / 2), -1),
+      },
+      speed: {
+        correctGuess: () => 60000,
+        incorrectGuess: 0,
+        changeWord: -5000,
+        nextVideo: 0,
+        revealLetter: () => -1000 * Math.floor((roundTimeLeft || 0) / mysteryWord.length / 1000) - 5000,
+        newMysteryWord: () => -1000 * Math.floor((roundTimeLeft || 0) / 2 / 1000) ,
+      },
+    };
+    let hintCost: any = hintCosts[gameMode][hintType];
+    if (typeof hintCost === 'function') hintCost = hintCost();
+    if (formatCost) {
+      if (hintCost === 0) return 'FREE';
+      let formattedCost: string = '';
+      formattedCost = formattedCost.concat(hintCost > 0 ? '+' : '-');
+      formattedCost = formattedCost.concat(gameMode === 'endurance' ? `${Math.abs(hintCost)} HP` : `${formatTime(Math.abs(hintCost))}`);
+      return formattedCost;
+    } 
+    return hintCost;
+  }
   /**
    * Checks if guessWord matches the mystery word. If guessWord matches, starts a new round and rewards hint points, if incorrect it charges hintpoints.
    * @param guessWord The word the user guessed.
@@ -277,7 +277,7 @@ function App() {
     if (mysteryWord.toLowerCase() === guessWord.toLowerCase()) {
       setVideoIsPlaying(false);
       setGameState('roundover');
-      changeConfettiFalling(true);
+      setConfettiFalling(true);
       chargeHintCost('correctGuess');
       setCurrentScore(currentScore+1);
     } else {
@@ -355,30 +355,18 @@ function App() {
     }
   }
 
-  /**
-   * Enables or disables the falling confetti element, and once enabled sets a timer to disable it after the animation.
-   * @param newConfettiFalling A boolean that controls whether to start or stop the confetti.
-   * @returns void.
-   */
-  function changeConfettiFalling(newConfettiFalling: boolean): void {
-    setConfettiFalling(newConfettiFalling);
-    if(newConfettiFalling) {
-      setTimeout(()=>{setConfettiFalling(false)}, 8000);
-    }
-  }
-
   return (
     <div className="App">
       <header className="App-header">
         {confettiFalling &&
           <Confetti
             className="confetti"
-            numberOfPieces={10000}
-            opacity={1}
-            gravity={0.095}
-            initialVelocityY={70}
-            tweenDuration={15000}
+            numberOfPieces={15000}
+            gravity={0.2}
+            initialVelocityY={100}
+            tweenDuration={10000}
             recycle={false}
+            onConfettiComplete={()=>{setConfettiFalling(false)}}
             colors={[ //REFERENCE: $rainbow-colors in variables.scss
               `rgb(252, 65, 65)`,
               `orange`,
@@ -397,7 +385,7 @@ function App() {
               <div><StandardButton 
                 classNames={`round light`} 
                 buttonText={`►`} 
-                clickHandler={()=>{changeConfettiFalling(true)}} />
+                clickHandler={()=>{setConfettiFalling(true)}} />
               </div>
               <span>P</span><span>L</span><span>A</span><span>Y</span><span>E</span><span>R</span>
             </div>
@@ -471,52 +459,49 @@ function App() {
         }
         <div className="hint-container">
           {gameState==='playing' &&
-          <>
-            <div className="grid-container">
-              <div className="grid-item">
-                <InputButton 
-                  classNames={`hint`} 
-                  buttonText={`Guess Mystery Word`}
-                  secondaryButtonText={`${getHintCost('incorrectGuess', true)} or ${getHintCost('correctGuess', true)}`}
-                  clickHandler={checkAnswer} 
-                  validationFunction={validateGuessMysteryWord}
-                  placeholder={`${mysteryWord.length} Letter Mystery Word`}/>
-              </div>
-              <div className="grid-item">
-                <InputButton 
-                  classNames={`hint ${!canAffordHint('changeWord') && 'disabled'}`} 
-                  buttonText={`Change Your Word`} 
-                  secondaryButtonText={getHintCost('changeWord', true)}
-                  clickHandler={changeUserWord}
-                  validationFunction={validateChangeUserWord}
-                  placeholder={`Your New Word`}/>
-              </div>
-              <div className="grid-item">
-                <StandardButton 
-                  classNames={`hint ${(videosPurchased >= currentSearch.current.length - 1 || !canAffordHint('nextVideo')) && 'disabled'}`} 
-                  buttonText={`Buy Next Video`} 
-                  secondaryButtonText={
-                    videosPurchased >= currentSearch.current.length - 1 && currentSearch.current.length > 0 
-                      ? 'All videos purchased!' 
-                      : getHintCost('nextVideo', true)
-                  }
-                  clickHandler={buyNextVideo} />
-              </div>
-              <div className="grid-item">
-                <StandardButton 
-                  classNames={`hint ${!canAffordHint('revealLetter') && 'disabled'}`} 
-                  buttonText={`Reveal Random Letter`} 
-                  secondaryButtonText={getHintCost('revealLetter', true)}
-                  clickHandler={revealLetter} />
-              </div>
-                <StandardButton 
-                  classNames={`hint ${!canAffordHint('newMysteryWord') && 'disabled'}`} 
-                  buttonText={`New Mystery Word`} 
-                  secondaryButtonText={getHintCost('newMysteryWord', true)}
-                  clickHandler={()=>{generateNewMysteryWord(false)}} />
+          <div className="grid-container">
+            <div className="grid-item">
+              <InputButton 
+                classNames={`hint`} 
+                buttonText={`Guess Mystery Word`}
+                secondaryButtonText={`${getHintCost('incorrectGuess', true)} or ${getHintCost('correctGuess', true)}`}
+                clickHandler={checkAnswer} 
+                validationFunction={validateGuessMysteryWord}
+                placeholder={`${mysteryWord.length} Letter Mystery Word`}/>
             </div>
-            
-          </>
+            <div className="grid-item">
+              <InputButton 
+                classNames={`hint ${!canAffordHint('changeWord') && 'disabled'}`} 
+                buttonText={`Change Your Word`} 
+                secondaryButtonText={getHintCost('changeWord', true)}
+                clickHandler={changeUserWord}
+                validationFunction={validateChangeUserWord}
+                placeholder={`Your New Word`}/>
+            </div>
+            <div className="grid-item">
+              <StandardButton 
+                classNames={`hint ${(videosPurchased >= currentSearch.current.length - 1 || !canAffordHint('nextVideo')) && 'disabled'}`} 
+                buttonText={`Buy Next Video`} 
+                secondaryButtonText={
+                  videosPurchased >= currentSearch.current.length - 1 && currentSearch.current.length > 0 
+                    ? 'All videos purchased!' 
+                    : getHintCost('nextVideo', true)
+                }
+                clickHandler={buyNextVideo} />
+            </div>
+            <div className="grid-item">
+              <StandardButton 
+                classNames={`hint ${!canAffordHint('revealLetter') && 'disabled'}`} 
+                buttonText={`Reveal Random Letter`} 
+                secondaryButtonText={getHintCost('revealLetter', true)}
+                clickHandler={revealLetter} />
+            </div>
+            <StandardButton 
+              classNames={`hint ${!canAffordHint('newMysteryWord') && 'disabled'}`} 
+              buttonText={`New Mystery Word`} 
+              secondaryButtonText={getHintCost('newMysteryWord', true)}
+              clickHandler={()=>{generateNewMysteryWord(false)}} />
+          </div>
           }
           {(gameState==='menu' || gameState==='gameover') &&
           <div className="start-menu">
