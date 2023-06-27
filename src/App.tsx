@@ -26,6 +26,8 @@ const analytics = getAnalytics(app);
 const searchYoutube = httpsCallable(getFunctions(), 'searchYoutube');
 
 const mysteryWordsFile = require('./words.txt');
+const maxHP: number = 100;
+const roundTimeLimit: number = 120000;
 
 //TODO: Use to track total round times for final speed score
 // class Timer {
@@ -51,7 +53,7 @@ function App() {
   const [userWord, setUserWord] = useState<string>('');
   const [mysteryWord, setMysteryWord] = useState<string>('');
   const [guessedWords, setGuessedWords] = useState<Array<string>>([]);
-  const [hintPoints, setHintPoints] = useState<number>(100);
+  const [hintPoints, setHintPoints] = useState<number>(maxHP);
   const [currentScore, setCurrentScore] = useState<number>(0);
   const [searchIndex, setSearchIndex] = useState<number>(0);
   const [videosPurchased, setVideosPurchased] = useState<number>(0);
@@ -64,9 +66,7 @@ function App() {
   const [roundTimeLeft, setRoundTimeLeft] = useState<number>();
   const [videoHistory, setVideoHistory] = useState<Array<Array<VideoInfo>>>([]);
 
-  const roundTimeLimit: number = 120000;
-
-  /** Prepare words list. This code will only run when component mounts */
+  /** Prepare the words list. This code will only run when component mounts */
   useEffect(() => {
     fetch(mysteryWordsFile).then(response => response.text()).then((text) => {
       wordsList.current = text.split('\r\n');
@@ -95,14 +95,13 @@ function App() {
         setVideoId(newSearchResults[searchIndex].videoId);
         addToVideoHistory(newSearchResults[searchIndex]);
         currentSearch.current = newSearchResults;
-        console.log('MYSTERY WORD:', mysteryWord, '\nUSER WORD:', userWord, '\nSEARCHINDEX:', searchIndex);
       })
       .catch((err: any) => console.log('Search error:', err));
     };
     if (userWord && mysteryWord) searchVids();
   }, [userWord, mysteryWord]);
 
-  // Change video with previously fetched data when updating index
+  /** Change video with previously fetched data when updating search index */
   useEffect(() => {
     if (currentSearch.current.length > 0) setVideoId(currentSearch.current[searchIndex].videoId); 
   }, [searchIndex]);
@@ -132,9 +131,16 @@ function App() {
     const newVideoHistory: VideoInfo[][] = [...videoHistory];
     (newVideoHistory[roundNumber] ||= []).push(newVideoInfo);
     setVideoHistory(newVideoHistory);
-    console.log('Current video history',newVideoHistory);
   }
 
+  /**
+   * Removes the last video from the video history and current search results if there is an error 
+   * loading the video. It then sets the current video ID to the next video in the search results 
+   * if there are any left. If there are no more videos left in the search results, it sets the 
+   * current video ID to the previous video in the video history.
+   * @param error - The error object.
+   * @returns void
+   */
   function handleVideoLoadError(error: any): void {
     let newVideoHistory: VideoInfo[][] = [...videoHistory];
     newVideoHistory[newVideoHistory.length - 1].splice(-1);
@@ -166,25 +172,31 @@ function App() {
     setCurrentScore(0);
     setRoundNumber(0);
     if (gameMode === 'endurance') {
-      setHintPoints(100);
+      setHintPoints(maxHP);
     } else if (gameMode === 'speed') {
       setRoundTimeLeft(roundTimeLimit);
     }
     setVideoIsPlaying(true);
   }
 
+  /**
+   * Starts the next round of the game, generates a new mystery word, and resumes video playing.
+   * @returns void
+   */
   function startNextRound(): void {
     setRoundNumber(roundNumber+1);
     generateNewMysteryWord(true);
     setGameState('playing');
     setVideoIsPlaying(true);
-    if(gameMode === 'speed') {
-      //restart the countdown timer
-      roundTimeLeft && setRoundTimeLeft(roundTimeLeft - 100);
-    }
+    if(gameMode === 'speed') roundTimeLeft && setRoundTimeLeft(roundTimeLeft - 100); //restart the countdown timer
   }
 
+  /**
+   * Changes the gamestate to bring up the gameover screen, stops video playback.
+   * @returns void
+   */
   function endGame(): void {
+    //TODO: Add local leaderboard
     setGameState('gameover');
     setVideoIsPlaying(false);
   }
@@ -195,14 +207,12 @@ function App() {
    * @returns void.
    */
   function changeHintPoints(pointChange: number): void {
-    const newHintPoints = Math.max(0, Math.min(hintPoints + pointChange, 100));
+    const newHintPoints = Math.max(0, Math.min(hintPoints + pointChange, maxHP));
     setHintPoints(newHintPoints);
-    if (newHintPoints === 0) {
-      endGame();
-    }
+    if (newHintPoints === 0) endGame();
   }
 
-    /**
+  /**
    * Charges the user for the cost of a hint based on the current game mode and game state.
    * @param {keyof HintCosts} hintType - The key for the type of hint being used.
    * @returns {void}
@@ -219,21 +229,31 @@ function App() {
         default:
           console.log(`Add a chargeHintCost case for ${gameMode}!`)
       }
-    }
+    } 
 
+    /**
+     * Check if the current hint can be bought with remaining time or hint points
+     * @param hintType 
+     * @returns boolean - true if the hint can be afforded
+     */
     function canAffordHint(hintType: keyof HintCosts): boolean {
-      let budget: number = roundTimeLeft ? roundTimeLeft : hintPoints;
-      return budget > -1 * getHintCost(hintType);
+      return (roundTimeLeft ? roundTimeLeft : hintPoints) > -1 * getHintCost(hintType);
     }
 
+  /**
+    * Returns the cost of using a hint in the game, optionally formatted as a string.
+    * @param hintType - The type of hint to use, such as ‘correctGuess’, ‘changeWord’, etc.
+    * @param formatCost - Whether to format the cost as a string or not. If true, the cost will be prefixed with ‘+’ or ‘-’ and suffixed with ‘HP’ or time units depending on the game mode. If false, the cost will be a number.
+    * @returns The cost of using the hint, either as a number or a string. 
+    */ 
     function getHintCost(hintType: keyof HintCosts, formatCost?: boolean): any {
       const hintCosts: { [key in GameMode]: HintCosts } = { 
         endurance: {
-          correctGuess: () => hintPoints === 100 ? 0 : Math.floor((100-hintPoints)/4) + 2,
+          correctGuess: () => hintPoints === maxHP ? 0 : Math.floor((maxHP-hintPoints)/4) + 2,
           incorrectGuess: -2,
           changeWord: -10,
           nextVideo: -3,
-          revealLetter: () => -1 * Math.floor(100 / mysteryWord.length),
+          revealLetter: () => -1 * Math.floor(maxHP / mysteryWord.length),
           newMysteryWord: () => Math.min(-1 * Math.floor(hintPoints / 2), -1),
         },
         speed: {
@@ -245,11 +265,10 @@ function App() {
           newMysteryWord: () => -1000 * Math.floor((roundTimeLeft || 0) / 2 / 1000) ,
         },
       };
-
       let hintCost: any = hintCosts[gameMode][hintType];
       if (typeof hintCost === 'function') hintCost = hintCost();
       if (formatCost) {
-        if (hintCost === 0 ) return 'FREE';
+        if (hintCost === 0) return 'FREE';
         let formattedCost: string = '';
         formattedCost = formattedCost.concat(hintCost > 0 ? '+' : '-');
         formattedCost = formattedCost.concat(gameMode === 'endurance' ? `${Math.abs(hintCost)} HP` : `${formatTime(Math.abs(hintCost))}`);
@@ -287,38 +306,37 @@ function App() {
     if (!isFree) chargeHintCost('newMysteryWord');
   }
 
+  /**
+   * Validates the user’s guess input for the mystery word.
+   * @param input - The user’s input string.
+   * @returns A string with an error message if the input is invalid, or null if the input is valid
+   */
   function validateGuessMysteryWord(input: string): string | null {
-    if(input.length !== mysteryWord.length) {
-      return `Must be ${mysteryWord.length} letters long! (${input.length}/${mysteryWord.length})`
-    }
-    if (guessedWords.includes(input)) {
-      return `You already guessed ${input}!`;
-    }
+    if (input.length !== mysteryWord.length) return `Must be ${mysteryWord.length} letters long! (${input.length}/${mysteryWord.length})`
+    if (guessedWords.includes(input)) return `You already guessed ${input}!`;
     return null;
   }
 
   /**
-   * Changes the user's word, sets the search index to 0, and charges hint points.
+   * Changes the user's word and charges hint points.
    * @param newWord The new user word.
    * @param isFree if true, changes the user's word without a cost to hint points.
    * @returns void.
    */
-  function changeUserWord(newWord: string, isFree?: boolean): void | string {
-    if (!newWord || (newWord.toLowerCase() === userWord.toLowerCase())) {
-      return 'incorrect';
-    }
+  function changeUserWord(newWord: string, isFree?: boolean): void {
     setUserWord(newWord);
     if (!isFree) chargeHintCost('changeWord');
     if (gameState==='roundover') startNextRound();
   }
 
+  /**
+   * Validates the user’s input for the new user word.
+   * @param input - The user’s input string.
+   * @returns A string with an error message if the input is invalid, or null if the input is valid
+   */
   function validateChangeUserWord(input: string): string | null {
-    if(input.length === 0) {
-      return `Enter your new word!`
-    }
-    if (userWord.toLowerCase() === input) {
-      return `You're already using this word!`;
-    }
+    if(input.length === 0) return `Enter your new word!`;
+    if (userWord.toLowerCase() === input.toLowerCase()) return `You're already using this word!`;
     return null;
   }
   
@@ -331,7 +349,12 @@ function App() {
     chargeHintCost('revealLetter');
   }
 
-  function buyNextVideo(): void | string {
+  /**
+   * This function buys the next video, adds it to the video history, 
+   * and sets the search index to purchased video, triggering it to play
+   * @returns void
+   */
+  function buyNextVideo(): void {
     if (videosPurchased < currentSearch.current.length) {
       const newVideosPurchased = videosPurchased + 1
       setVideosPurchased(newVideosPurchased);
@@ -438,7 +461,7 @@ function App() {
             <div className="hp-bar-container">
               {gameMode==='speed' && roundTimeLeft
                 ? <HPBar maxHP={roundTimeLimit} currentHP={roundTimeLeft} isTimer={true}/>
-                : <HPBar maxHP={100} currentHP={hintPoints}/>
+                : <HPBar maxHP={maxHP} currentHP={hintPoints}/>
               }
             </div>
           </div>
@@ -526,6 +549,7 @@ function App() {
               buttonText={`Choose Next Word`}
               secondaryButtonText={`Change your starting word for free`}
               clickHandler={(nextWord)=>{return changeUserWord(nextWord, true);}}
+              validationFunction={validateChangeUserWord}
               placeholder={`Current Word: ${userWord}`}/>
             OR
             <StandardButton

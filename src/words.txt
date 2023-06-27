@@ -847,7 +847,6 @@ efficient
 effort
 egg
 eight
-either
 elderly
 elect
 election
@@ -1698,7 +1697,6 @@ negotiate
 negotiation
 neighbor
 neighborhood
-neither
 nerve
 nervous
 net
