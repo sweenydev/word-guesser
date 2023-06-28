@@ -9,8 +9,9 @@ import VideoBrowser from './reusable-components/video-browser/video-browser';
 import HPBar from './reusable-components/hp-bar/hp-bar';
 import { formatTime } from './util';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { initializeApp } from 'firebase/app';
+import { getAnalytics } from 'firebase/analytics';
+import useCountdownTimer from './custom-hooks/countdown-timer';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCI5pnnoKyC9g1AHSN0qq_xkGc3bOaUSPk",
@@ -27,28 +28,12 @@ const searchYoutube = httpsCallable(getFunctions(), 'searchYoutube');
 
 const mysteryWordsFile = require('./words.txt');
 const maxHP: number = 100;
-const roundTimeLimit: number = 120000;
-
-//TODO: Use to track total round times for final speed score
-// class Timer {
-//   private startTime: number = 0;
-//   private endTime: number = 0;
-
-//   start(): void {
-//     this.startTime = Date.now();
-//   }
-
-//   stop(): number {
-//     this.endTime = Date.now();
-//     return this.endTime - this.startTime;
-//   }
-// }
+const timeLimit: number = 120000;
 
 function App() {
   const wordsList = useRef<Array<string>>([]);
   const currentSearch = useRef<Array<any>>([]);
   const mysteryWordComponentRef = useRef<any>(null);
-  const timeChange = useRef<number>(0);
 
   const [userWord, setUserWord] = useState<string>('');
   const [mysteryWord, setMysteryWord] = useState<string>('');
@@ -63,8 +48,8 @@ function App() {
   const [gameState, setGameState] = useState<GameState>('menu');
   const [gameMode, setGameMode] = useState<GameMode>('endurance');
   const [roundNumber, setRoundNumber] = useState<number>(0);
-  const [roundTimeLeft, setRoundTimeLeft] = useState<number>();
   const [videoHistory, setVideoHistory] = useState<Array<Array<VideoInfo>>>([]);
+  const [timeRemaining, startOrStopTimer, setTimeRemaining] = useCountdownTimer(timeLimit);
 
   /** Prepare the words list. This code will only run when component mounts */
   useEffect(() => {
@@ -78,7 +63,8 @@ function App() {
     const searchVids = async() => {
       currentSearch.current = [];
       setSearchIndex(0);
-      setVideoId('1p6ofiJDACk');
+      setVideoIsPlaying(false);
+      startOrStopTimer(false);
       searchYoutube(`${userWord} ${mysteryWord}`).then(async (searchResults: any) => {
         const newSearchResults: VideoInfo[] = searchResults.data;
         newSearchResults.sort((a, b) => { // Move videos with the words in the title to the top of the results, both words -> mystery word -> user word
@@ -106,21 +92,10 @@ function App() {
     if (currentSearch.current.length > 0) setVideoId(currentSearch.current[searchIndex].videoId); 
   }, [searchIndex]);
   
-  /** Counting and gameover logic for countdown timer, updates every 100 ms when roundTimeLeft is defined */
+  /** End the game when the countdown timer reaches 0*/
   useEffect(() => {
-    if (roundTimeLeft !== undefined) {
-      if (roundTimeLeft > 0) {
-        if(gameState === 'playing') {
-          setTimeout(() => {
-            setRoundTimeLeft(prevRoundTimeLeft => (prevRoundTimeLeft || 0) - 100 + timeChange.current);
-            if (timeChange.current !== 0) timeChange.current = 0;
-          }, 100);
-        }
-      } else {
-        endGame();
-      }
-    }
-  }, [roundTimeLeft]);
+    if (timeRemaining === 0) endGame();
+  }, [timeRemaining]);
 
   /**
    * Adds a new VideoInfo object to the video history array for the current round.
@@ -142,6 +117,7 @@ function App() {
    * @returns void
    */
   function handleVideoLoadError(error: any): void {
+    if (gameMode==='speed') startOrStopTimer(false);
     let newVideoHistory: VideoInfo[][] = [...videoHistory];
     newVideoHistory[newVideoHistory.length - 1].splice(-1);
     setVideoHistory(newVideoHistory);
@@ -154,6 +130,15 @@ function App() {
     }
     setVideoId(currentSearch.current[searchIndex].videoId);
     console.log('error occurred on vid!', error);
+  }
+
+  /**
+   * Play video and resume the timer when the video is loaded
+   * @returns void
+   */
+  function onVideoReady(): void {
+    setVideoIsPlaying(true);
+    if (gameMode === 'speed') startOrStopTimer(true);
   }
 
   /**
@@ -174,9 +159,8 @@ function App() {
     if (gameMode === 'endurance') {
       setHintPoints(maxHP);
     } else if (gameMode === 'speed') {
-      setRoundTimeLeft(roundTimeLimit);
+      setTimeRemaining(timeLimit);
     }
-    setVideoIsPlaying(true);
   }
 
   /**
@@ -187,8 +171,6 @@ function App() {
     setRoundNumber(roundNumber+1);
     generateNewMysteryWord(true);
     setGameState('playing');
-    setVideoIsPlaying(true);
-    if(gameMode === 'speed') roundTimeLeft && setRoundTimeLeft(roundTimeLeft - 100); //restart the countdown timer
   }
 
   /**
@@ -215,7 +197,7 @@ function App() {
         if (newHintPoints === 0) endGame();
         break;
       case 'speed':
-        timeChange.current += hintCost;
+        setTimeRemaining(timeRemaining + hintCost);
         break;
       default:
         console.log(`Add a chargeHintCost case for ${gameMode}!`)
@@ -228,7 +210,7 @@ function App() {
    * @returns boolean - true if the hint can be afforded
    */
   function canAffordHint(hintType: keyof HintCosts): boolean {
-    return (roundTimeLeft ? roundTimeLeft : hintPoints) > -1 * getHintCost(hintType);
+    return (gameMode === 'speed' ? timeRemaining : hintPoints) > -1 * getHintCost(hintType);
   }
 
   /**
@@ -252,8 +234,8 @@ function App() {
         incorrectGuess: 0,
         changeWord: -5000,
         nextVideo: 0,
-        revealLetter: () => -1000 * Math.floor((roundTimeLeft || 0) / mysteryWord.length / 1000) - 5000,
-        newMysteryWord: () => -1000 * Math.floor((roundTimeLeft || 0) / 2 / 1000) ,
+        revealLetter: () => -1000 * Math.floor(timeRemaining / mysteryWord.length / 1000) - 7000,
+        newMysteryWord: () => -1000 * Math.floor(timeRemaining / 2 / 1000) ,
       },
     };
     let hintCost: any = hintCosts[gameMode][hintType];
@@ -275,6 +257,7 @@ function App() {
   function checkAnswer(guessWord: string): void | string {
     setGuessedWords([...guessedWords, guessWord]);
     if (mysteryWord.toLowerCase() === guessWord.toLowerCase()) {
+      if (gameMode === 'speed') startOrStopTimer(false);
       setVideoIsPlaying(false);
       setGameState('roundover');
       setConfettiFalling(true);
@@ -362,9 +345,8 @@ function App() {
           <Confetti
             className="confetti"
             numberOfPieces={15000}
-            gravity={0.2}
             initialVelocityY={100}
-            tweenDuration={10000}
+            tweenDuration={8000}
             recycle={false}
             onConfettiComplete={()=>{setConfettiFalling(false)}}
             colors={[ //REFERENCE: $rainbow-colors in variables.scss
@@ -417,7 +399,7 @@ function App() {
             config={{
               playerVars: { autoplay: 1 },
             }}
-            onReady={(e)=>{/*TODO resume timer here in endurance mode*/ console.log('video ready!', e)}}
+            onReady={onVideoReady}
             onError={handleVideoLoadError}
             position="absolute"/>
         </div>
@@ -438,8 +420,8 @@ function App() {
           <div className="hint-points">
             {gameMode === 'speed' ? 'Time Left:' : 'Hint Points:'}
             <div className="hp-bar-container">
-              {gameMode==='speed' && roundTimeLeft
-                ? <HPBar maxHP={roundTimeLimit} currentHP={roundTimeLeft} isTimer={true}/>
+              {gameMode==='speed'
+                ? <HPBar maxHP={timeLimit} currentHP={timeRemaining} isTimer={true}/>
                 : <HPBar maxHP={maxHP} currentHP={hintPoints}/>
               }
             </div>

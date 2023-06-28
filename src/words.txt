@@ -2293,7 +2293,6 @@ security
 see
 seed
 seek
-seem
 segment
 seize
 select
