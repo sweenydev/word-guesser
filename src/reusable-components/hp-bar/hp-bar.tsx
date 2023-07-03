@@ -1,5 +1,6 @@
 import './hp-bar.scss';
 import { formatTime } from '../../util';
+import CountUp from 'react-countup';
 
 interface HPBarProps {
   maxHP: number;
@@ -17,7 +18,13 @@ const HPBar: React.FC<HPBarProps> = ({ maxHP, currentHP, isTimer }) => {
   return (
     <div className="hp-container">
       <div className="hp-text">
-        {isTimer ? formatTime(currentHP || maxHP) : `${currentHP}/${maxHP}`}
+        {isTimer && formatTime(currentHP || maxHP)}
+        {!isTimer && 
+        <>
+          <CountUp end={currentHP as number} preserveValue={true}/>{`/${maxHP}`}
+        </>
+        }
+        
       </div>
       <div 
         className={`hp-bar ${maxHP-(currentHP || maxHP)<=0?'full':''}`} 

@@ -10,6 +10,11 @@ declare type VideoInfo = {
   views: number;
 };
 
+declare type RoundScores = {
+  certainty: number;
+  independence: number;
+}
+
 declare type HintCosts = {
   [key: string]: number | (() => number);
   correctGuess: () => number;

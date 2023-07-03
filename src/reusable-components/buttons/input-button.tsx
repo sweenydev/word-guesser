@@ -74,7 +74,7 @@ const InputButton: React.FC<InputButtonProps> = ({ buttonText, secondaryButtonTe
     <div
       onMouseEnter={()=>setMouseEntered(true)}
       onMouseLeave={()=>setMouseEntered(false)}
-      style={{display:`inline-flex`, width:`100%`}}>
+      className={`input-button`}>
       <StandardButton 
         classNames={`input ${classNames} ${validationMessage ? 'disabled' : ''}`} 
         buttonText={buttonText} 

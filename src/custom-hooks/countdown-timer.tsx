@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 /**
  * A custom hook that takes an initial time in seconds and returns the time remaining, a function to toggle the timer, and a function to change the timeRemaining value.
- * @param initialTime - The initial time in seconds.
+ * @param initialTime - The initial time in milliseconds.
  * @returns the time remaining in milliseconds, a function to start or stop the timer, and a function to set the time remaining.
  */
 function useCountdownTimer(initialTime: number): [number, (startTimer: boolean) => void, (newTimeRemaining: number) => void] {

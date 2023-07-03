@@ -32,8 +32,9 @@ body {
 
 /** VIDEOPLAYER **/
 $screen-top: .6vh;
-$screen-height: 57vh;
+$screen-height: 60vh;
 $screen-width: calc($screen-height * 1.7778);
+$max-screen-width: (100vw);
 
 
 /** This bezel is layered over the video player to hide the title, with the video player set taller to place the title in black space outside the video's frame*/
@@ -42,7 +43,7 @@ $screen-width: calc($screen-height * 1.7778);
   top: $screen-top;
   height: $screen-height;
   width: $screen-width;
-  max-width: calc(95vw - 16vh);
+  max-width: $max-screen-width;
   border: 6vh solid $secondary-color;
   border-left: 8vh solid $secondary-color;
   border-right: 8vh solid $secondary-color;
@@ -77,13 +78,23 @@ $screen-width: calc($screen-height * 1.7778);
         align-self: center;
       }
     }
+    .round-scores {
+      display: flex;
+      align-items: center;
+      font-size: 3vmin;
+      width: 100%;
+      span {
+        text-align: center;
+        flex-basis: 33%;
+      }
+    }
   }
 }
 
 .tv-screen {
   height: calc($screen-height + 12vh - 2px);
   width: calc($screen-width + 1px);
-  max-width: calc(95vw - 14vh);
+  max-width: $max-screen-width;
   position: absolute;
   top: $screen-top;
 }
@@ -94,6 +105,7 @@ $screen-width: calc($screen-height * 1.7778);
   position:absolute;
   top: calc($screen-top + ($screen-height / 2) + 2vh);
   width: calc($screen-width + 14vh);
+  max-width: $max-screen-width;
   .button {
     margin: 0;
     width: 4vh;
@@ -134,17 +146,18 @@ $screen-width: calc($screen-height * 1.7778);
   z-index: 4;
   position: absolute;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   top: ($screen-height + $screen-top + 6vh);
   height: 5vh;
   line-height: 5vh;
-  width: ($screen-width);
+  width: $screen-width;
+  max-width: $max-screen-width;
   max-width: calc(95vw - 16vh);
   font-size: calc(2.3vmin);
   span {
     justify-content: flex-start;
     flex-basis: 50%;
+    white-space: nowrap;
   }
   .user-word {
     color: $primary-color;
@@ -157,35 +170,29 @@ $screen-width: calc($screen-height * 1.7778);
 .hint-container {
   position: absolute;
   bottom: .3vh;
-  height: 27.5vh;
-  padding: 5px 20px 15px;
-  margin: 0 20px;
+  height: 24.5vh;
+  padding: 12px 20px;
   border-radius: 20px;
   background-color: rgba($secondary-color, 0.94);
-  min-width: 75%;
-  max-width: 100%;
+  width: 95%;
   .grid-container {
     height: 100%;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
+    justify-content: space-around;
     .grid-item {
-      flex-basis: 50%;
-      .button {
-        width: auto;
+      flex-basis: 49%;
+      display: flex;
+    }
+    .full-row-item {
+      flex-basis: 99%;
+      display: flex;
+      text-align: center;
+      div {
+        width: 100%
       }
     }
-    .button {
-      width: 100%;
-    }
-  }
-  .start-menu {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
   }
   .round-over {
     height: 100%;

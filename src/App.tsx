@@ -12,6 +12,7 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import useCountdownTimer from './custom-hooks/countdown-timer';
+import CountUp from 'react-countup';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCI5pnnoKyC9g1AHSN0qq_xkGc3bOaUSPk",
@@ -39,6 +40,7 @@ function App() {
   const [mysteryWord, setMysteryWord] = useState<string>('');
   const [guessedWords, setGuessedWords] = useState<Array<string>>([]);
   const [hintPoints, setHintPoints] = useState<number>(maxHP);
+  const [roundScores, setRoundScores] = useState<Array<RoundScores>>([]);
   const [currentScore, setCurrentScore] = useState<number>(0);
   const [searchIndex, setSearchIndex] = useState<number>(0);
   const [videosPurchased, setVideosPurchased] = useState<number>(0);
@@ -47,7 +49,7 @@ function App() {
   const [confettiFalling, setConfettiFalling] = useState<boolean>(false);
   const [gameState, setGameState] = useState<GameState>('menu');
   const [gameMode, setGameMode] = useState<GameMode>('endurance');
-  const [roundNumber, setRoundNumber] = useState<number>(0);
+  const [roundNumber, setRoundNumber] = useState<number>(-1);
   const [videoHistory, setVideoHistory] = useState<Array<Array<VideoInfo>>>([]);
   const [timeRemaining, startOrStopTimer, setTimeRemaining] = useCountdownTimer(timeLimit);
 
@@ -150,17 +152,16 @@ function App() {
   function startGame(gameMode: GameMode, initUserWord: string): void | string {
     if (!initUserWord) return 'incorrect';
     setVideoHistory([]);
-    generateNewMysteryWord(true);
-    changeUserWord(initUserWord, true);
-    setGameState('playing');
-    setGameMode(gameMode);
     setCurrentScore(0);
-    setRoundNumber(0);
+    setRoundNumber(-1);
+    setGameMode(gameMode);
+    changeUserWord(initUserWord, true);
     if (gameMode === 'endurance') {
       setHintPoints(maxHP);
     } else if (gameMode === 'speed') {
       setTimeRemaining(timeLimit);
     }
+    startNextRound();
   }
 
   /**
@@ -170,6 +171,7 @@ function App() {
   function startNextRound(): void {
     setRoundNumber(roundNumber+1);
     generateNewMysteryWord(true);
+    setRoundScores([...roundScores, {independence: 100, certainty: 100}]);
     setGameState('playing');
   }
 
@@ -189,6 +191,7 @@ function App() {
    * @returns {void}
    */ 
   function chargeHintCost(hintType: keyof HintCosts): void {
+    // Deduct hint cost
     let hintCost: number = getHintCost(hintType);
     switch(gameMode) {
       case 'endurance': 
@@ -201,6 +204,21 @@ function App() {
         break;
       default:
         console.log(`Add a chargeHintCost case for ${gameMode}!`)
+    }
+    // Adjust round scores based on hint type
+    if (hintType !== 'correctGuess') {
+      const newRoundScores: RoundScores[] = [...roundScores];
+      switch(hintType) {
+        case 'incorrectGuess':
+          newRoundScores[roundNumber].certainty-=5;
+          break;
+        case 'revealLetter':
+          newRoundScores[roundNumber].independence-=Math.floor(100 / mysteryWord.length);
+          break;
+        default:
+          newRoundScores[roundNumber].independence-=5;
+      }
+      setRoundScores(newRoundScores);
     }
   } 
 
@@ -234,7 +252,7 @@ function App() {
         incorrectGuess: 0,
         changeWord: -5000,
         nextVideo: 0,
-        revealLetter: () => -1000 * Math.floor(timeRemaining / mysteryWord.length / 1000) - 7000,
+        revealLetter: () => Math.min(-1000 * Math.floor(timeRemaining / mysteryWord.length / 500), -10000),
         newMysteryWord: () => -1000 * Math.floor(timeRemaining / 2 / 1000) ,
       },
     };
@@ -262,7 +280,7 @@ function App() {
       setGameState('roundover');
       setConfettiFalling(true);
       chargeHintCost('correctGuess');
-      setCurrentScore(currentScore+1);
+      setCurrentScore(currentScore + roundScores[roundNumber].certainty + roundScores[roundNumber].independence);
     } else {
       chargeHintCost('incorrectGuess');
       return 'incorrect';
@@ -376,6 +394,23 @@ function App() {
           {gameState==='roundover' && 
           <div className="menu-screen">
             <div>Correct!</div>
+            <div className="round-scores">
+              <span>Certainty: 
+                <CountUp 
+                  end={roundScores[roundNumber].certainty}
+                  useEasing={false}/> 
+              </span>
+              <span>Independence: 
+                <CountUp 
+                  end={roundScores[roundNumber].independence}
+                  useEasing={false}/> 
+              </span>
+              <span>Round Score: 
+                <CountUp 
+                  end={roundScores[roundNumber].independence + roundScores[roundNumber].certainty}
+                  useEasing={false}/> 
+              </span>
+            </div>
             <VideoBrowser
               videoHistory={videoHistory}
               roundNumber={roundNumber}/>
@@ -396,6 +431,7 @@ function App() {
             height="100%"
             pip={false}
             playing={videoIsPlaying}
+            loop={true}
             config={{
               playerVars: { autoplay: 1 },
             }}
@@ -432,7 +468,7 @@ function App() {
         {gameState==='playing' &&
         <div className="words-container">
           <span>Your Word: 
-            <span className='user-word'>{userWord}</span>
+            <span className="user-word">{userWord}</span>
           </span>
           <span>Mystery Word:
             <MysteryWord ref={mysteryWordComponentRef} mysteryWord={mysteryWord}/>
@@ -478,43 +514,71 @@ function App() {
                 secondaryButtonText={getHintCost('revealLetter', true)}
                 clickHandler={revealLetter} />
             </div>
-            <StandardButton 
-              classNames={`hint ${!canAffordHint('newMysteryWord') && 'disabled'}`} 
-              buttonText={`New Mystery Word`} 
-              secondaryButtonText={getHintCost('newMysteryWord', true)}
-              clickHandler={()=>{generateNewMysteryWord(false)}} />
+            <div className="full-row-item">
+              <StandardButton 
+                classNames={`hint ${!canAffordHint('newMysteryWord') && 'disabled'}`} 
+                buttonText={`New Mystery Word`} 
+                secondaryButtonText={getHintCost('newMysteryWord', true)}
+                clickHandler={()=>{generateNewMysteryWord(false)}} />
+            </div>
           </div>
           }
           {(gameState==='menu' || gameState==='gameover') &&
-          <div className="start-menu">
-            {gameState==='gameover' && <div>Play Again?</div>}
-            <InputButton
-              classNames={`hint`}
-              buttonText={`Endurance Mode`}
-              clickHandler={(initUserWord)=>{return startGame('endurance', initUserWord)}} 
-              placeholder={`Enter Your Starting Word Here`}/>
-            <InputButton
-              classNames={`hint`}
-              buttonText={`Speed Mode`}
-              clickHandler={(initUserWord)=>{return startGame('speed', initUserWord)}}
-              placeholder={`Enter Your Starting Word Here`}/>
+          <div className="start-menu grid-container">
+            {gameState==='gameover' && <div className="full-row-item"><div>Play Again?</div></div>}
+            <div className="full-row-item">
+              <InputButton
+                classNames={`hint`}
+                buttonText={`Endurance Mode`}
+                clickHandler={(initUserWord)=>{return startGame('endurance', initUserWord)}} 
+                placeholder={`Enter Your Starting Word Here`}/>
+            </div>
+            <div className="full-row-item">
+              <InputButton
+                classNames={`hint`}
+                buttonText={`Speed Mode`}
+                clickHandler={(initUserWord)=>{return startGame('speed', initUserWord)}}
+                placeholder={`Enter Your Starting Word Here`}/>
+            </div>
+            {gameState==='menu' && 
+            <>
+            <div className="grid-item">
+              <StandardButton
+                classNames={`hint`}
+                buttonText={`How to Play`}
+                clickHandler={()=>{}}/>
+            </div>
+            <div className="grid-item">
+              <StandardButton
+                classNames={`hint`}
+                buttonText={`Options`}
+                clickHandler={()=>{}}/>
+            </div>
+            </>
+            }
           </div>
           }
           {gameState==='roundover' &&
           <div className="grid-container round-over">
-            <InputButton
-              classNames={`hint`}
-              buttonText={`Choose Next Word`}
-              secondaryButtonText={`Change your starting word for free`}
-              clickHandler={(nextWord)=>{return changeUserWord(nextWord, true);}}
-              validationFunction={validateChangeUserWord}
-              placeholder={`Current Word: ${userWord}`}/>
-            OR
-            <StandardButton
-              classNames={`hint`}
-              buttonText={`Let it Ride!`}
-              secondaryButtonText={`Keep using the same word ("${userWord}")`}
-              clickHandler={startNextRound} />
+            <div className="full-row-item">
+              <InputButton
+                classNames={`hint`}
+                buttonText={`Choose Next Word`}
+                secondaryButtonText={`Change your starting word for free`}
+                clickHandler={(nextWord)=>{return changeUserWord(nextWord, true);}}
+                validationFunction={validateChangeUserWord}
+                placeholder={`Current Word: ${userWord}`}/>
+            </div>
+            <div className="full-row-item">
+              <div>OR</div>
+            </div>
+            <div className="full-row-item">
+              <StandardButton
+                classNames={`hint`}
+                buttonText={`Let it Ride!`}
+                secondaryButtonText={`Keep using the same word ("${userWord}")`}
+                clickHandler={startNextRound} />
+            </div>
           </div>
           }
         </div>      

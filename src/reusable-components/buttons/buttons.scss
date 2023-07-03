@@ -1,12 +1,11 @@
 @import '/src/variables.scss';
 
-$button-height: 5.5vh;
+$button-height: 5.2vh;
 .button {
   z-index: 3;
   height: $button-height;
   border-radius: 10px;
   padding: 3px 5px;
-  margin: 10px;
   user-select: none;
   font-size: 2.6vmin;
   display: flex;
@@ -27,7 +26,6 @@ $button-height: 5.5vh;
   &.input {
     border-radius: 10px 0 0 10px;
     border-right: 1px;
-    margin-right: 0px;
     flex-basis: 50%;
   }
   &.round {
@@ -76,7 +74,6 @@ $button-height: 5.5vh;
   z-index: 2;
   font-size: calc(2vmin);
   height: $button-height;
-  margin: 10px 10px 0 0;
   border-radius: 0 10px 10px 0;
   border: 4px solid $primary-color;
   padding: 0px 5px 6px 8px;
@@ -96,7 +93,10 @@ $button-height: 5.5vh;
     pointer-events: none;
   }
 }
-
+.input-button {
+  display:inline-flex;
+  width: 100%;
+}
 .disabled {
   cursor: not-allowed !important;
   filter: saturate(0) !important;
