@@ -554,13 +554,13 @@ function App() {
             <>
             <div className="grid-item">
               <StandardButton
-                classNames={`hint`}
+                classNames={`hint disabled`}
                 buttonText={`How to Play`}
                 clickHandler={()=>{}}/>
             </div>
             <div className="grid-item">
               <StandardButton
-                classNames={`hint`}
+                classNames={`hint disabled`}
                 buttonText={`Options`}
                 clickHandler={()=>{}}/>
             </div>
