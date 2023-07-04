@@ -1,0 +1,23 @@
+@import '/src/variables.scss';
+.video-seek-overlay {
+  z-index: 10;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  &:hover {
+    cursor: pointer;
+    .line {
+      opacity: 1;
+    }
+  }
+  .line {
+    height: 100%;
+    transition: opacity 300ms ease-out;
+    opacity: 0;
+    border-right: 10px dashed $primary-color;
+    position: absolute;
+    &.current {
+      border-right: 10px solid $primary-color;
+    }
+  }
+}

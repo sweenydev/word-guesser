@@ -13,6 +13,7 @@ import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import useCountdownTimer from './custom-hooks/countdown-timer';
 import CountUp from 'react-countup';
+import SeekingOverlay from './reusable-components/seeking-overlay/seeking-overlay';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCI5pnnoKyC9g1AHSN0qq_xkGc3bOaUSPk",
@@ -33,8 +34,10 @@ const timeLimit: number = 120000;
 
 function App() {
   const wordsList = useRef<Array<string>>([]);
-  const currentSearch = useRef<Array<any>>([]);
+  const currentSearch = useRef<Array<VideoInfo>>([]);
+
   const mysteryWordComponentRef = useRef<any>(null);
+  const videoPlayerComponentRef = useRef<any>(null);
 
   const [userWord, setUserWord] = useState<string>('');
   const [mysteryWord, setMysteryWord] = useState<string>('');
@@ -378,14 +381,20 @@ function App() {
             ]}/>
         } 
         <div className="tv-bezel">
+          {videoIsPlaying &&
+          <SeekingOverlay 
+            calculateSeekFraction={()=>{return videoPlayerComponentRef.current?.getCurrentTime() / videoPlayerComponentRef.current?.getDuration()}}
+            onSeek={videoPlayerComponentRef.current?.seekTo}/>
+          }
           {gameState==='menu' && 
           <div className="menu-screen">
             <div className="dancing-letters title">
               <span>W</span><span>O</span><span>R</span><span>D</span>
-              <div><StandardButton 
-                classNames={`round light`} 
-                buttonText={`►`} 
-                clickHandler={()=>{setConfettiFalling(true)}} />
+              <div>
+                <StandardButton 
+                  classNames={`round light`} 
+                  buttonText={`►`} 
+                  clickHandler={()=>{setConfettiFalling(true)}} />
               </div>
               <span>P</span><span>L</span><span>A</span><span>Y</span><span>E</span><span>R</span>
             </div>
@@ -426,6 +435,7 @@ function App() {
         </div>
         <div className="tv-screen">
           <ReactPlayer
+            ref={videoPlayerComponentRef}
             url={`https://www.youtube.com/embed/${videoId}`}
             width="100%"
             height="100%"
