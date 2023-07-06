@@ -7,10 +7,13 @@ $line-thinckness: 10px;
   position: absolute;
   &:hover {
     cursor: pointer;
-    background-color: rgba(black, 0.27);
+    background-color: rgba(black, 0.25);
     transition: background-color 300ms ease-out;
     .line {
       opacity: 1;
+      &.seeking {
+        opacity: 0.82;
+      }
     }
   }
   .line {
@@ -24,18 +27,20 @@ $line-thinckness: 10px;
       transition: left linear 125ms; //Smooths the low frame rate caused by currentTime's update rate
     }
     .time-label {
-      background: rgba($tertiary-color, 0.6);
+      background: $tertiary-color;
+      min-width: 5vw;
+      text-align: center;
       color: white;
       border-radius: 10px;
-      padding: 10px;
-      left: calc(5px + 1%);
-      bottom: 1%;
+      padding: 5px;
+      left: calc(-2.5vw - 10px);
+      bottom: 2%;
       position: absolute;
       font-size: 3.5vmin;
     }
     .play-pause-button {
       position: absolute;
-      bottom: 18%;
+      bottom: 19%;
       left: -5.5vh;
       width: 6vh;
       height: 6vh;

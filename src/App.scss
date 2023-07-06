@@ -31,8 +31,8 @@ body {
 }
 
 /** VIDEOPLAYER **/
-$screen-top: .6vh;
-$screen-height: 60vh;
+$screen-top: .5vh;
+$screen-height: 63vh;
 $screen-width: calc($screen-height * 1.7778);
 $max-screen-width: (100vw);
 
@@ -170,7 +170,7 @@ $max-screen-width: (100vw);
 .hint-container {
   position: absolute;
   bottom: .3vh;
-  height: 24.5vh;
+  height: 21.5vh;
   padding: 12px 20px;
   border-radius: 20px;
   background-color: rgba($secondary-color, 0.94);
