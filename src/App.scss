@@ -103,8 +103,9 @@ $max-screen-width: (100vw);
   justify-content: space-between;
   position:absolute;
   top: calc($screen-top + ($screen-height / 2) + 2vh);
-  width: calc($screen-width + 14vh);
+  width: calc($screen-width + 14.5vh);
   max-width: $max-screen-width;
+  height: 4vh;
   .button {
     margin: 0;
     width: 4vh;
@@ -189,7 +190,7 @@ $max-screen-width: (100vw);
       display: flex;
       text-align: center;
       div {
-        width: 100%
+        width: 100%;
       }
     }
   }

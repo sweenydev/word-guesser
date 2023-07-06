@@ -1,4 +1,5 @@
 @import '/src/variables.scss';
+$line-thinckness: 10px;
 .video-seek-overlay {
   z-index: 10;
   height: 100%;
@@ -16,10 +17,41 @@
     height: 100%;
     transition: opacity 300ms ease-out;
     opacity: 0;
-    border-right: 10px dashed $primary-color;
+    border-left: $line-thinckness dashed $primary-color;
     position: absolute;
     &.current {
-      border-right: 10px solid $primary-color;
+      border-left: $line-thinckness solid $primary-color;
+      transition: left linear 125ms; //Smooths the low frame rate caused by currentTime's update rate
+    }
+    .time-label {
+      background: rgba($tertiary-color, 0.6);
+      color: white;
+      border-radius: 10px;
+      padding: 10px;
+      left: calc(5px + 1%);
+      bottom: 1%;
+      position: absolute;
+      font-size: 3.5vmin;
+    }
+    .play-pause-button {
+      position: absolute;
+      bottom: 18%;
+      left: -5.5vh;
+      width: 6vh;
+      height: 6vh;
+      .button {
+        border: $line-thinckness solid $primary-color;
+        .primary-text {
+          font-weight: bolder;
+          font-size: 5vmin !important;
+          line-height: 6vh;
+        }
+      }
+      &.playing {
+        .button .primary-text {
+          font-size: 6vmin !important;
+        }
+      }
     }
   }
 }

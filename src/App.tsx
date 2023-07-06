@@ -49,6 +49,7 @@ function App() {
   const [videosPurchased, setVideosPurchased] = useState<number>(0);
   const [videoId, setVideoId] = useState<string>('1p6ofiJDACk');
   const [videoIsPlaying, setVideoIsPlaying] = useState<boolean>(false);
+  const [videoDuration, setVideoDuration] = useState<number>(0);
   const [confettiFalling, setConfettiFalling] = useState<boolean>(false);
   const [gameState, setGameState] = useState<GameState>('menu');
   const [gameMode, setGameMode] = useState<GameMode>('endurance');
@@ -94,7 +95,7 @@ function App() {
 
   /** Change video with previously fetched data when updating search index */
   useEffect(() => {
-    if (currentSearch.current.length > 0) setVideoId(currentSearch.current[searchIndex].videoId); 
+    if (currentSearch.current.length > 0 && currentSearch.current.length >= searchIndex) setVideoId(currentSearch.current[searchIndex].videoId); 
   }, [searchIndex]);
   
   /** End the game when the countdown timer reaches 0*/
@@ -143,6 +144,7 @@ function App() {
    */
   function onVideoReady(): void {
     setVideoIsPlaying(true);
+    setVideoDuration(videoPlayerComponentRef.current?.getDuration());
     if (gameMode === 'speed') startOrStopTimer(true);
   }
 
@@ -381,11 +383,6 @@ function App() {
             ]}/>
         } 
         <div className="tv-bezel">
-          {videoIsPlaying &&
-          <SeekingOverlay 
-            calculateSeekFraction={()=>{return videoPlayerComponentRef.current?.getCurrentTime() / videoPlayerComponentRef.current?.getDuration()}}
-            onSeek={videoPlayerComponentRef.current?.seekTo}/>
-          }
           {gameState==='menu' && 
           <div className="menu-screen">
             <div className="dancing-letters title">
@@ -432,6 +429,14 @@ function App() {
             <VideoBrowser videoHistory={videoHistory}/>
           </div>
           }
+          {(gameState==='playing') &&
+          <SeekingOverlay
+            videoDuration={videoDuration}
+            getCurrentTime={videoPlayerComponentRef.current?.getCurrentTime}
+            isPlaying={videoIsPlaying}
+            onSeek={videoPlayerComponentRef.current?.seekTo}
+            onPauseOrPlay={setVideoIsPlaying}/>
+          }
         </div>
         <div className="tv-screen">
           <ReactPlayer
@@ -453,11 +458,11 @@ function App() {
         <div className="video-selectors">
           <StandardButton 
             classNames={`round ${searchIndex === 0 && 'hidden'}`} 
-            buttonText={`◄`} 
+            buttonText={`<`} 
             clickHandler={()=>{setSearchIndex(searchIndex - 1)}} />
           <StandardButton 
             classNames={`round ${searchIndex === videosPurchased && 'hidden'}`} 
-            buttonText={`►`} 
+            buttonText={`>`} 
             clickHandler={()=>{setSearchIndex(searchIndex + 1)}} />
         </div>
         }

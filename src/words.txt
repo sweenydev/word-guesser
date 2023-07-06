@@ -104,7 +104,6 @@ always
 amazing
 American
 among
-amount
 analysis
 analyst
 analyze
